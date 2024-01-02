@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.danubetech.keyformats.provider.Ed25519ProviderTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.176 s -- in com.danubetech.keyformats.provider.Ed25519ProviderTest

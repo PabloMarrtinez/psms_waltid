@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: info.weboftrust.ldsignatures.JsonLdSignEcdsaSecp256k1Signature2019Test
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.344 s -- in info.weboftrust.ldsignatures.JsonLdSignEcdsaSecp256k1Signature2019Test

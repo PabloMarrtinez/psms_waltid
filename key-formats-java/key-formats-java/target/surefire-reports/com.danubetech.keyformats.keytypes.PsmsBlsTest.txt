@@ -1,0 +1,12 @@
+-------------------------------------------------------------------------------
+Test set: com.danubetech.keyformats.keytypes.PsmsBlsTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.092 s <<< FAILURE! -- in com.danubetech.keyformats.keytypes.PsmsBlsTest
+com.danubetech.keyformats.keytypes.PsmsBlsTest.testSignVerify -- Time elapsed: 0.089 s <<< ERROR!
+java.lang.IllegalArgumentException: Unsupported private key PSMS and/or algorithm PSMSAlg
+	at com.danubetech.keyformats.crypto.PrivateKeySignerFactory.privateKeySignerForKey(PrivateKeySignerFactory.java:65)
+	at com.danubetech.keyformats.keytypes.AbstractTest.testSignVerify(AbstractTest.java:29)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+

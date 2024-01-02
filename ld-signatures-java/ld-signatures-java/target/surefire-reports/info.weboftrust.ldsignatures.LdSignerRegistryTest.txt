@@ -1,0 +1,13 @@
+-------------------------------------------------------------------------------
+Test set: info.weboftrust.ldsignatures.LdSignerRegistryTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.016 s <<< FAILURE! -- in info.weboftrust.ldsignatures.LdSignerRegistryTest
+info.weboftrust.ldsignatures.LdSignerRegistryTest.testLdSignerRegistry -- Time elapsed: 0.016 s <<< ERROR!
+java.lang.IllegalArgumentException
+	at info.weboftrust.ldsignatures.signer.LdSignerRegistry.getLdSignerBySignatureSuiteTerm(LdSignerRegistry.java:39)
+	at info.weboftrust.ldsignatures.signer.LdSignerRegistry.getLdSignerBySignatureSuite(LdSignerRegistry.java:50)
+	at info.weboftrust.ldsignatures.LdSignerRegistryTest.testLdSignerRegistry(LdSignerRegistryTest.java:16)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
