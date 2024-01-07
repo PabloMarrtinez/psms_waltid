@@ -75,7 +75,6 @@ public abstract class LdSigner<SIGNATURESUITE extends SignatureSuite> {
 
         // build the base proof object
 
-
         LdProof ldProof = LdProof.builder()
                 .defaultContexts(false)
                 .defaultTypes(false)
@@ -90,7 +89,6 @@ public abstract class LdSigner<SIGNATURESUITE extends SignatureSuite> {
                 .build();
 
         // obtain the canonicalized document
-
         byte[] canonicalizationResult = this.getCanonicalizer().canonicalize(ldProof, jsonLdObject);
 
 
@@ -103,13 +101,13 @@ public abstract class LdSigner<SIGNATURESUITE extends SignatureSuite> {
         this.sign(ldProofBuilder, canonicalizationResult);
 
         ldProof = ldProofBuilder.build();
-
         // add proof to JSON-LD
 
         if (addToJsonLdObject) ldProof.addToJsonLDObject(jsonLdObject);
         loadMissingContext(jsonLdObject);
-
         // done
+
+
 
         return ldProof;
     }

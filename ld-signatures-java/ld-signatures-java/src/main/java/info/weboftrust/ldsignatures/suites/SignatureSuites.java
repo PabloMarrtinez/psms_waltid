@@ -20,6 +20,7 @@ public class SignatureSuites {
 	public static final JsonWebSignature2020SignatureSuite SIGNATURE_SUITE_JSONWEBSIGNATURE2020 = new JsonWebSignature2020SignatureSuite();
 	public static final PsmsBlsSignature2022SignatureSuite SIGNATURE_SUITE_PSMSBLSSIGNATURE2022 = new PsmsBlsSignature2022SignatureSuite();
 
+	public static final PsmsBlsSignatureProof2022SignatureSuite SIGNATURE_SUITE_PSMSBLSSIGNATUREPROOF2022 = new PsmsBlsSignatureProof2022SignatureSuite();
 	public static final List<? extends SignatureSuite> SIGNATURE_SUITES = List.of(
 			SIGNATURE_SUITE_RSASIGNATURE2018,
 			SIGNATURE_SUITE_ED25519SIGNATURE2018,
@@ -30,7 +31,8 @@ public class SignatureSuites {
 			SIGNATURE_SUITE_JCSECDSASECP256L1SIGNATURE2019,
 			SIGNATURE_SUITE_BBSBLSSIGNATURE2020,
 			SIGNATURE_SUITE_JSONWEBSIGNATURE2020,
-			SIGNATURE_SUITE_PSMSBLSSIGNATURE2022
+			SIGNATURE_SUITE_PSMSBLSSIGNATURE2022,
+			SIGNATURE_SUITE_PSMSBLSSIGNATUREPROOF2022
 	);
 
 	private static final Map<Class<? extends SignatureSuite>, SignatureSuite> SIGNATURE_SUITES_BY_SIGNATURE_SUITE_CLASS;

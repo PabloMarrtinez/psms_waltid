@@ -6,6 +6,7 @@ import com.danubetech.keyformats.jose.JWK;
 import com.danubetech.keyformats.jose.JWSAlgorithm;
 import com.danubetech.keyformats.jose.KeyTypeName;
 import com.danubetech.keyformats.keytypes.KeyTypeName_for_JWK;
+import inf.um.psmultisign.PSverfKey;
 import org.bitcoinj.core.ECKey;
 
 import java.security.interfaces.ECPublicKey;
@@ -60,6 +61,12 @@ public class PublicKeyVerifierFactory {
         } else if (KeyTypeName.P_521.equals(keyTypeName)) {
 
             if (JWSAlgorithm.ES512.equals(algorithm)) return new P_521_ES512_PublicKeyVerifier((ECPublicKey) publicKey);
+        }else if (KeyTypeName.PSMS.equals(keyTypeName)) {
+
+            if (JWSAlgorithm.PSMSAlg.equals(algorithm)) return new PsmsBlsSignature2022_PublicKeyVerifier((PSverfKey) publicKey);
+        }else if (KeyTypeName.PSMSPROOF.equals(keyTypeName)) {
+
+            if (JWSAlgorithm.PSMSAlgProof.equals(algorithm)) return new PsmsBlsSignatureProof2022_PublicKeyVerifier((PSverfKey) publicKey);
         }
 
         throw new IllegalArgumentException("Unsupported public key " + keyTypeName + " and/or algorithm " + algorithm);

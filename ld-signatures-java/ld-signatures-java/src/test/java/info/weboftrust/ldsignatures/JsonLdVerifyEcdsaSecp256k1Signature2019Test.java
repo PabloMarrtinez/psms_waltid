@@ -35,7 +35,7 @@ public class JsonLdVerifyEcdsaSecp256k1Signature2019Test {
 
 		EcdsaSecp256k1Signature2019LdVerifier verifier = new EcdsaSecp256k1Signature2019LdVerifier(TestUtil.testSecp256k1PublicKey);
 		boolean verify = verifier.verify(jsonLdObject);
-
+		System.out.println(jsonLdObject);
 		assertFalse(verify);
 	}
 }

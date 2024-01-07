@@ -6,6 +6,8 @@ import com.danubetech.keyformats.jose.JWK;
 import com.danubetech.keyformats.jose.JWSAlgorithm;
 import com.danubetech.keyformats.jose.KeyTypeName;
 import com.danubetech.keyformats.keytypes.KeyTypeName_for_JWK;
+import inf.um.multisign.MSprivateKey;
+import inf.um.multisign.MSverfKey;
 import org.bitcoinj.core.ECKey;
 
 import java.security.KeyPair;
@@ -60,7 +62,16 @@ public class PrivateKeySignerFactory {
         } else if (KeyTypeName.P_521.equals(keyTypeName)) {
 
             if (JWSAlgorithm.ES512.equals(algorithm)) return new P_521_ES512_PrivateKeySigner((ECPrivateKey) privateKey);
+        } else if (KeyTypeName.PSMS.equals(keyTypeName)) {
+
+            if (JWSAlgorithm.PSMSAlg.equals(algorithm))
+                return new PsmsBlsSignature2022_PrivateKeySigner((MSprivateKey) privateKey);
+        }else if (KeyTypeName.PSMSPROOF.equals(keyTypeName)) {
+
+            if (JWSAlgorithm.PSMSAlgProof.equals(algorithm))
+                return new PsmsBlsSignatureProof2022_PrivateKeySigner((MSverfKey) privateKey, null,null,null);
         }
+
 
         throw new IllegalArgumentException("Unsupported private key " + keyTypeName + " and/or algorithm " + algorithm);
     }

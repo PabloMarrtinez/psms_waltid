@@ -15,6 +15,7 @@ public enum KeyTypeName {
     P_256(Curve.P_256),
     P_384(Curve.P_384),
     PSMS(Curve.PSMS),
+    PSMSPROOF(Curve.PSMSPROOF),
     P_521(Curve.P_521);
 
 

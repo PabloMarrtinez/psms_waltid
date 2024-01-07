@@ -51,7 +51,7 @@ public class JsonLdSignEd25519Signature2018Test {
 		signer.setDomain(domain);
 		signer.setNonce(nonce);
 		LdProof ldProof = signer.sign(jsonLdObject);
-
+		System.out.println(ldProof.toJson());
 		assertEquals(SignatureSuites.SIGNATURE_SUITE_ED25519SIGNATURE2018.getTerm(), ldProof.getType());
 		assertEquals(creator, ldProof.getCreator());
 		assertEquals(created, ldProof.getCreated());

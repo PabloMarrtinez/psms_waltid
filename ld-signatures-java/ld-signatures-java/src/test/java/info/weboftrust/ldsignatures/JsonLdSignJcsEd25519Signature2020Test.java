@@ -44,14 +44,13 @@ public class JsonLdSignJcsEd25519Signature2020Test {
 		Date created = JsonLDUtils.DATE_FORMAT.parse("2017-10-24T05:33:31Z");
 		String domain = "example.com";
 		String nonce = null;
-
 		JcsEd25519Signature2020LdSigner signer = new JcsEd25519Signature2020LdSigner(TestUtil.testEd25519PrivateKey);
 		signer.setCreator(creator);
 		signer.setCreated(created);
 		signer.setDomain(domain);
 		signer.setNonce(nonce);
 		LdProof ldProof = signer.sign(jsonLdObject);
-
+		System.out.println(jsonLdObject);
 		assertEquals(SignatureSuites.SIGNATURE_SUITE_JCSED25519SIGNATURE2020.getTerm(), ldProof.getType());
 		assertEquals(creator, ldProof.getCreator());
 		assertEquals(created, ldProof.getCreated());

@@ -25,6 +25,7 @@ public class PsmsBlsSignature2022_PrivateKeySigner extends PrivateKeySigner<MSpr
 
     @Override
     public byte[] sign(byte[] content) throws GeneralSecurityException {
+
         String s = new String(content, StandardCharsets.UTF_8);
 
         Map<String, String> diggest = PsmsUmuUtils.getDiggest(s);

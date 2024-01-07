@@ -6,7 +6,16 @@ import com.danubetech.keyformats.jose.KeyType;
 import com.danubetech.keyformats.jose.KeyTypeName;
 import com.danubetech.keyformats.keytypes.KeyTypeName_for_JWK;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import inf.um.model.attributes.Attribute;
+import inf.um.model.attributes.AttributeDefinition;
+import inf.um.model.attributes.AttributeDefinitionString;
 import inf.um.multisign.MSprivateKey;
+import inf.um.pairingBLS461.PairingBuilderBLS461;
+import inf.um.pairingBLS461.ZpElementBLS461;
+import inf.um.pairingInterfaces.PairingBuilder;
+import inf.um.pairingInterfaces.ZpElement;
+import inf.um.protos.PabcSerializer;
+import inf.um.psmultisign.PSprivateKey;
 import org.bitcoinj.core.ECKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -17,10 +26,16 @@ import java.security.KeyPair;
 import java.security.Security;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.*;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
+
 import java.util.Base64;
+import org.json.JSONObject;
+import org.miracl.core.BLS12461.BIG;
+
+import java.util.HashMap;
+import java.util.Map;
+import com.google.protobuf.ByteString;
+import inf.um.pairingBLS461.ZpElementBLS461;
+import inf.um.protos.PabcSerializer;
 
 public class JWK_to_PrivateKey {
 
@@ -29,6 +44,7 @@ public class JWK_to_PrivateKey {
 	}
 
 	public static Object JWK_to_anyPrivateKey(JWK jsonWebKey) {
+
 
 		KeyTypeName keyType = KeyTypeName_for_JWK.keyTypeName_for_JWK(jsonWebKey);
 
@@ -53,10 +69,12 @@ public class JWK_to_PrivateKey {
 		else if (keyType == KeyTypeName.P_384)
 			return JWK_to_P_384PrivateKey(jsonWebKey);
 		else if (keyType == KeyTypeName.PSMS)
-			return JWK_to_PsmsBlsPrivateKey(jsonWebKey.toString());
+			return JWK_to_PsmsBlsPrivateKey(jsonWebKey);
 		else
 			throw new IllegalArgumentException("Unsupported key type: " + keyType);
 	}
+
+	public static final PairingBuilder builder = new PairingBuilderBLS461();
 
 	public static KeyPair JWK_to_RSAPrivateKey(JWK jsonWebKey) {
 
@@ -206,27 +224,58 @@ public class JWK_to_PrivateKey {
 	}
 
 
-	public static MSprivateKey JWK_to_PsmsBlsPrivateKey(String jsonWebKey) {
-		ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonNode = null;
-        try {
-            jsonNode = mapper.readTree(jsonWebKey);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+	public static MSprivateKey JWK_to_PsmsBlsPrivateKey(JWK jsonWebKey) {
 
-        String kty = jsonNode.get("kty").asText();
-		String crv = jsonNode.get("crv").asText();
+
+        String kty = jsonWebKey.getKty();
+		String crv = jsonWebKey.getCrv();
 
 		if (!"EC".equals(kty)) throw new IllegalArgumentException("Incorrect key type: " + kty);
 		if (!"PSMS".equals(crv)) throw new IllegalArgumentException("Incorrect curve: " + crv);
 
-		String x = jsonNode.get("x").asText();
-		String y_m = jsonNode.get("y_m").asText();
-		String epoch = jsonNode.get("epoch").asText();
+		// CONSTRUCCION DE zpElement con el valor x
+		byte[] decode_bytes_x = Base64.getDecoder().decode(jsonWebKey.getX());
+		ByteString byteString_x = ByteString.copyFrom(decode_bytes_x);
+		PabcSerializer.ZpElement zpElementProto_x = PabcSerializer.ZpElement.newBuilder()
+				.setX(byteString_x)
+				.build();
+		ZpElementBLS461 zpElement_x = new ZpElementBLS461(zpElementProto_x);
 
-		JsonNode yNode = jsonNode.get("y");
-		return null;
+
+		// CONSTRUCCION DE zpElement con el valor y_m
+
+		byte[] decode_bytes_ym = Base64.getDecoder().decode(jsonWebKey.getY_m());
+		ByteString byteString_ym = ByteString.copyFrom(decode_bytes_ym);
+		PabcSerializer.ZpElement zpElementProto_ym = PabcSerializer.ZpElement.newBuilder()
+				.setX(byteString_ym)
+				.build();
+		ZpElementBLS461 zpElement_ym = new ZpElementBLS461(zpElementProto_ym);
+
+		// CONSTRUCCION de epoch
+
+		byte[] decode_bytes_epoch = Base64.getDecoder().decode(jsonWebKey.getEpoch());
+		ByteString byteString_epoch = ByteString.copyFrom(decode_bytes_epoch);
+		PabcSerializer.ZpElement zpElementProto_epoch = PabcSerializer.ZpElement.newBuilder()
+				.setX(byteString_epoch)
+				.build();
+		ZpElementBLS461 zp_epoch = new ZpElementBLS461(zpElementProto_epoch);
+
+		JSONObject jsonObject = new JSONObject(jsonWebKey.getY());
+		Map<String, ZpElement> y_zp = new HashMap<>();
+
+		// Creacion de mapa ID -> valor base64
+		jsonObject.keys().forEachRemaining(key -> {
+			String encodedValue = jsonObject.getString(key);
+			byte[] decodedBytes = Base64.getDecoder().decode(encodedValue);
+			ByteString b = ByteString.copyFrom(decodedBytes);
+			PabcSerializer.ZpElement zp_seriealizer = PabcSerializer.ZpElement.newBuilder()
+					.setX(b)
+					.build();
+			ZpElementBLS461 zp = new ZpElementBLS461(zp_seriealizer);
+			y_zp.put(key,zp);
+		});
+
+		return new PSprivateKey(zpElement_x, zpElement_ym, y_zp, zp_epoch);
 	}
 
 

@@ -6,6 +6,13 @@ import com.danubetech.keyformats.jose.JWK;
 import com.danubetech.keyformats.jose.KeyType;
 import com.danubetech.keyformats.jose.KeyTypeName;
 import com.danubetech.keyformats.keytypes.KeyTypeName_for_JWK;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
+import inf.um.pairingBLS461.ZpElementBLS461;
+import inf.um.pairingInterfaces.Group1Element;
+import inf.um.protos.PabcSerializer;
+import inf.um.pairingBLS461.Group1ElementBLS461;
+import inf.um.psmultisign.PSverfKey;
 import org.bitcoinj.core.ECKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -17,7 +24,13 @@ import java.security.Security;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.*;
+import java.util.Base64;
+import org.json.JSONObject;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.miracl.core.BLS12461.BIG;
+import org.miracl.core.BLS12461.ECP;
 public class JWK_to_PublicKey {
 
 	static {
@@ -207,6 +220,113 @@ public class JWK_to_PublicKey {
 
 		return publicKey;
 	}
+
+
+	public static ECP createECPFromXY(JSONObject jsonObject) {
+		// Convertir los arreglos de bytes a objetos BIG
+		byte[] bytesx = Base64.getDecoder().decode(jsonObject.getString("x"));
+		byte[] bytesy = Base64.getDecoder().decode(jsonObject.getString("y"));
+		System.out.println(new String(bytesx));
+		System.out.println(new String(bytesy));
+		BIG x = BIG.fromBytes(bytesx);
+		BIG y = BIG.fromBytes(bytesy);
+
+		// Crear y retornar el objeto ECP
+		return new ECP(x, y);
+	}
+
+	public static ECP createECPFromXY2(JSONObject jsonObject) {
+		// Convertir los arreglos de bytes a objetos BIG
+		byte[] bytesx = Base64.getDecoder().decode(jsonObject.getString("x"));
+		byte[] bytesy = Base64.getDecoder().decode(jsonObject.getString("y"));
+		System.out.println(new String(bytesx));
+		System.out.println(new String(bytesy));
+		BIG x = BIG.fromBytes(bytesx);
+		BIG y = BIG.fromBytes(bytesy);
+
+		// Crear y retornar el objeto ECP
+		return new ECP(x, y);
+	}
+
+	/*
+	public static PSverfKey JWK_to_Psms_PublicKey(JWK jsonWebKey) {
+
+		if (! KeyType.EC.equals(jsonWebKey.getKty())) throw new IllegalArgumentException("Incorrect key type: " + jsonWebKey.getKty());
+		if (! Curve.PSMS.equals(jsonWebKey.getCrv())) throw new IllegalArgumentException("Incorrect curve: " + jsonWebKey.getCrv());
+
+
+
+
+
+		String vx_x = new String(Base64.getDecoder().decode(jsonObject_vx.getString("x")));
+		String vx_y = new String(Base64.getDecoder().decode(jsonObject_vx.getString("y")));
+		ByteString byteString_vx_x = ByteString.copyFromUtf8(vx_x);
+		ByteString byteString_vx_y = ByteString.copyFromUtf8(vx_y);
+
+
+		// Crear el objeto PabcSerializer.ECP
+		PabcSerializer.ECP vx_proto = PabcSerializer.ECP.newBuilder()
+				.setX(byteString_vx_x)
+				.setY(byteString_vx_y)
+				.build();
+
+		// VX
+		JSONObject jsonObject_vx = new JSONObject(jsonWebKey.getVx());
+		ECP vx_ecp = createECPFromXY(jsonObject_vx);
+		Group1ElementBLS461 vx_group1 = new Group1ElementBLS461(vx_ecp);
+
+		// VY_M
+		JSONObject jsonObject_vy_m = new JSONObject(jsonWebKey.getVy_m());
+		ECP vy_m_ecp = createECPFromXY(jsonObject_vy_m);
+		Group1ElementBLS461 vy_m_group1 = new Group1ElementBLS461(vy_m_ecp);
+
+		// VY_EPOCH
+		JSONObject jsonObject_vy_epoch = new JSONObject(jsonWebKey.getVy_epoch());
+		ECP vy_epoch_ecp = createECPFromXY(jsonObject_vy_epoch);
+		Group1ElementBLS461 vy_epoch_group1 = new Group1ElementBLS461(vy_epoch_ecp);
+
+		//VY
+		JSONObject jsonObject_vy = new JSONObject(jsonWebKey.getVy());
+		Map<String, Group1Element> vy = new HashMap<>();
+
+		for (String key : jsonObject_vy.keySet()) {
+			JSONObject innerObject = jsonObject_vy.getJSONObject(key);
+
+			ECP vy_ecp = createECPFromXY(innerObject);
+			Group1ElementBLS461 vy_group1 = new Group1ElementBLS461(vy_ecp);
+
+			// Add the decoded map to the final map
+			vy.put(key, vy_group1);
+		}
+
+		return new PSverfKey(vx_group1,vy_m_group1,vy, vy_epoch_group1);
+	}
+	*/
+	public static PSverfKey JWK_to_Psms_PublicKey(JWK jsonWebKey) {
+		if (! KeyType.EC.equals(jsonWebKey.getKty())) throw new IllegalArgumentException("Incorrect key type: " + jsonWebKey.getKty());
+		if (! Curve.PSMS.equals(jsonWebKey.getCrv())) throw new IllegalArgumentException("Incorrect curve: " + jsonWebKey.getCrv());
+		System.out.println("test: "+jsonWebKey.getVx());
+		byte[] decode_bytes_vx = Base64.getDecoder().decode(jsonWebKey.getVx());
+		ByteString byteString_vx = ByteString.copyFrom(decode_bytes_vx);
+		PabcSerializer.Group1Element group1ElementProto = null;
+		PabcSerializer.ECP ecp = PabcSerializer.ECP.newBuilder()
+				.setX(byteString_vx).build();
+		group1ElementProto = PabcSerializer.Group1Element.newBuilder().setX(ecp).build();
+
+		Group1ElementBLS461 group1Element = new Group1ElementBLS461(group1ElementProto);
+		System.out.println("vx: "+Base64.getEncoder().encodeToString(group1Element.toBytes()));
+
+
+		byte[] decode_bytes_vy_m = Base64.getDecoder().decode(jsonWebKey.getVy_m());
+
+
+		byte[] decode_bytes_vy_epoch = Base64.getDecoder().decode(jsonWebKey.getVy_epoch());
+
+
+
+		return null;
+	}
+
 
 	/*
 	 * Convenience methods
