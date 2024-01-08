@@ -52,7 +52,6 @@ public class PsmsBlsSignatureProof2022_PrivateKeySigner extends PrivateKeySigner
         MSmessage mAttr=new PSmessage(values,epoch);
         PSzkToken token=(PSzkToken) psScheme.presentZKtoken(this.getPrivateKey(),zkpfields.keySet(),mAttr,this.nonce,signature);
         PabcSerializer.PSzkToken zkToken = token.toProto();
-        System.out.println("Token: "+ zkToken);
         return zkToken.toByteArray();
     }
 }

@@ -21,37 +21,28 @@ import java.util.Map;
 
 public class PsmsBlsSignatureProof2022LdSigner extends LdSigner<PsmsBlsSignatureProof2022SignatureSuite>{
 
-    private String nonce;
-    private static Map<String, String> zkpFields;
-    public PsmsBlsSignatureProof2022LdSigner(ByteSigner signer, String nonce, Map<String, String> zkpFields) {
+
+    public PsmsBlsSignatureProof2022LdSigner(ByteSigner signer) {
         super(SignatureSuites.SIGNATURE_SUITE_PSMSBLSSIGNATUREPROOF2022, signer, new URDNA2015UmuCanonicalizer());
-        this.nonce = nonce;
-        this.zkpFields = zkpFields;
+
     }
 
     public PsmsBlsSignatureProof2022LdSigner(PSverfKey privateKey, String nonce, Map<String, String> zkpFields, JsonLDObject credential) {
-        this(new PsmsBlsSignatureProof2022_PrivateKeySigner(privateKey, nonce, zkpFields, credential), nonce, zkpFields);
+        this(new PsmsBlsSignatureProof2022_PrivateKeySigner(privateKey, nonce, zkpFields, credential));
     }
 
     public PsmsBlsSignatureProof2022LdSigner(String nonce, Map<String, String> zkpFields) {
-        this((ByteSigner) null, nonce, zkpFields);
+        this((ByteSigner) null);
     }
 
 
-    public String getNonce() {
-        return nonce;
-    }
-
-    public static Map<String, String> getZkpFields() {
-        return zkpFields;
-    }
 
     public static void sign(LdProof.Builder<? extends LdProof.Builder<?>> ldProofBuilder, byte[] signingInput, ByteSigner signer) throws GeneralSecurityException {
 
         // build the JWS and sign
         String content = new String(signingInput);
         System.out.println("CONTENT: "+content);
-        String content_included = PsmsBlsUmuUtil.zkp_fields(content,getZkpFields().keySet());
+        String content_included = PsmsBlsUmuUtil.processRdfData(content);
         System.out.println("content_included: "+content_included);
         byte[] bytes = signer.sign(content_included.getBytes(StandardCharsets.UTF_8), Curve.PSMSPROOF);
 

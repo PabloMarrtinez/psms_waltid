@@ -19,6 +19,7 @@ import info.weboftrust.ldsignatures.signer.PsmsBlsSignature2022LdSigner;
 
 import info.weboftrust.ldsignatures.signer.PsmsBlsSignatureProof2022LdSigner;
 import info.weboftrust.ldsignatures.verifier.PsmsBlsSignature2022LdVerifier;
+import info.weboftrust.ldsignatures.verifier.PsmsBlsSignatureProof2022LdVerifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -135,13 +136,23 @@ public class JsonLdSignPsmsBlsSignatureTest {
 
 
         // CREDENTIAL /
+
+        JsonLDObject jsonLdObject2 = JsonLDObject.fromJson(new InputStreamReader(Objects.requireNonNull(JsonLdSignPsmsBlsSignatureTest.class.getResourceAsStream("vc_umu.jsonld"))));
+        jsonLdObject2.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, String> zkpFields = objectMapper.readValue(zkp_fields, new TypeReference<Map<String, String>>() {});
         String nonce = "123456789";
-        System.out.println("ldObject: "+ldProof);
 
         PsmsBlsSignatureProof2022LdSigner signerProof = new PsmsBlsSignatureProof2022LdSigner((PSverfKey) keys.getSecond(),nonce,zkpFields,ldProof);
-        LdProof zkproof = signerProof.sign(jsonLdObject);
+        PsmsBlsSignatureProof2022LdVerifier verifierProof = new PsmsBlsSignatureProof2022LdVerifier(keys.getSecond(), nonce, zkpFields);
+        LdProof zkproof = signerProof.sign(jsonLdObject2);
+
+        System.out.println("Credential: "+jsonLdObject2);
+        System.out.println("zkproof: "+zkproof);
+
+        boolean verifyProof = verifierProof.verify(jsonLdObject2,zkproof);
+        assertTrue(verifyProof);
+
 
 
 
