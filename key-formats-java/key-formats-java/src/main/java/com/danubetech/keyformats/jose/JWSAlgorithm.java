@@ -13,7 +13,7 @@ public class JWSAlgorithm {
     public static final String ES512 = "ES512";
     public static final String ES256KCC = "ES256KCC";
     public static final String ES256KRR = "ES256KRR";
-    public static final String PSMSAlg = "PSMS";
-    public static final String PSMSAlgProof = "PSMSPROOF";
+    public static final String PSMSAlg = "PsmsBlsSignature2022";
+    public static final String PSMSAlgProof = "PsmsBlsSignature2022Proof";
 
 }

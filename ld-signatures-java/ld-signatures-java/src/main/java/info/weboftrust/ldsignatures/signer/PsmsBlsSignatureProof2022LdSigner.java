@@ -41,9 +41,7 @@ public class PsmsBlsSignatureProof2022LdSigner extends LdSigner<PsmsBlsSignature
 
         // build the JWS and sign
         String content = new String(signingInput);
-        System.out.println("CONTENT: "+content);
         String content_included = PsmsBlsUmuUtil.processRdfData(content);
-        System.out.println("content_included: "+content_included);
         byte[] bytes = signer.sign(content_included.getBytes(StandardCharsets.UTF_8), Curve.PSMSPROOF);
 
         String proofValue = Multibase.encode(Multibase.Base.Base58BTC, bytes);

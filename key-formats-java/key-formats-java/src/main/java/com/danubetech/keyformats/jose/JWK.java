@@ -46,6 +46,16 @@ public class JWK {
 
     @JsonProperty("vy_epoch") private String vy_epoch;
 
+    @JsonProperty("pk") private String public_key;
+
+    public String getPublic_key() {
+        return public_key;
+    }
+
+    public void setPublic_key(String public_key) {
+        this.public_key = public_key;
+    }
+
     public String getY_m() {
         return y_m;
     }
@@ -54,37 +64,11 @@ public class JWK {
         return epoch;
     }
 
-    public void setY_m(String y_m) {
-        this.y_m = y_m;
-    }
-
-    public void setEpoch(String epoch) {
-        this.epoch = epoch;
-    }
-
-    public void setVx(String vx) {
-        this.vx = vx;
-    }
-
-    public void setVy(String vy) {
-        this.vy = vy;
-    }
-
-    public void setVy_m(String vy_m) {
-        this.vy_m = vy_m;
-    }
-
-    public void setVy_epoch(String vy_epoch) {
-        this.vy_epoch = vy_epoch;
-    }
 
     public String getVx() {
         return vx;
     }
 
-    public String getVy() {
-        return vy;
-    }
 
     public String getVy_m() {
         return vy_m;

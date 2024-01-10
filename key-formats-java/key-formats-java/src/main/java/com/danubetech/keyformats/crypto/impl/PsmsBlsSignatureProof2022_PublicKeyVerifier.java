@@ -4,7 +4,6 @@ import com.danubetech.keyformats.crypto.PublicKeyVerifier;
 import com.danubetech.keyformats.jose.Curve;
 import com.danubetech.keyformats.util.PsmsUmuUtils;
 import com.google.protobuf.InvalidProtocolBufferException;
-import foundation.identity.jsonld.JsonLDObject;
 import inf.um.model.exceptions.MSSetupException;
 import inf.um.multisign.*;
 import inf.um.pairingBLS461.ZpElementBLS461;
@@ -36,7 +35,7 @@ public class PsmsBlsSignatureProof2022_PublicKeyVerifier extends PublicKeyVerifi
             PabcSerializer.PSzkToken zktoken = PabcSerializer.PSzkToken.parseFrom(signature);
             PSzkToken token = new PSzkToken(zktoken);
             String s = new String(content, StandardCharsets.UTF_8);
-            Map<String, String> diggest = PsmsUmuUtils.getDiggest(s);
+            Map<String, String> diggest = PsmsUmuUtils.getDigest(s);
             Map<String, ZpElement> values = PsmsUmuUtils.zkp_Attributes(diggest);
 
             int seedLength = PsmsUmuUtils.FIELD_BYTES;

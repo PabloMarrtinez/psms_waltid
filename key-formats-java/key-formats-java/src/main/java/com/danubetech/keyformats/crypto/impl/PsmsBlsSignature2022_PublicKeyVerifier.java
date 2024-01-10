@@ -36,8 +36,8 @@ public class PsmsBlsSignature2022_PublicKeyVerifier extends PublicKeyVerifier<MS
             String s = new String(content, StandardCharsets.UTF_8);
 
 
-            Map<String, String> diggest = PsmsUmuUtils.getDiggest(s);
-            Map<String, ZpElement> values = PsmsUmuUtils.zkp_Attributes(diggest);
+            Map<String, String> digest = PsmsUmuUtils.getDigest(s);
+            Map<String, ZpElement> values = PsmsUmuUtils.zkp_Attributes(digest);
 
             int seedLength = PsmsUmuUtils.FIELD_BYTES;
             RAND rng = new RAND();

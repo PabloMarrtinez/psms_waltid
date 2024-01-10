@@ -4,15 +4,15 @@ import com.danubetech.keyformats.crypto.PrivateKeySigner;
 import com.danubetech.keyformats.crypto.PrivateKeySignerFactory;
 import com.danubetech.keyformats.crypto.PublicKeyVerifier;
 import com.danubetech.keyformats.crypto.PublicKeyVerifierFactory;
+import com.danubetech.keyformats.jose.JWSAlgorithm;
 import com.danubetech.keyformats.jose.KeyTypeName;
-import inf.um.pairingInterfaces.Group1Element;
-import inf.um.psmultisign.PSverfKey;
+
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
+
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,29 +33,11 @@ public abstract class AbstractTest {
 	public void testSignVerify() throws Exception {
 		for (String algorithm : this.getAlgorithms()) {
 			PrivateKeySigner<?> privateKeySigner = PrivateKeySignerFactory.privateKeySignerForKey(this.getKeyTypeName(), algorithm, this.getPrivateKey());
-			if (algorithm.equals("PSMS")) {
-				assertTrue(true);
-				/*
+			if (JWSAlgorithm.PSMSAlgProof.equals(algorithm) || JWSAlgorithm.PSMSAlg.equals(algorithm)) {
 				byte[] signature = privateKeySigner.sign(this.getContentPsms(), algorithm);
-				PSverfKey k = (PSverfKey) this.getPublicKey();
-				PublicKeyVerifier<?> publicKeyVerifier = PublicKeyVerifierFactory.publicKeyVerifierForKey(this.getKeyTypeName(), algorithm, k);
-
-
-				System.out.println("vx: "+k.getVX().toProto().toString());
-				System.out.println("vy_m: "+k.getVY_m().toProto().toString());
-				System.out.println("vy_epoch: "+k.getVY_epoch().toProto().toString());
-
-
-				for (Map.Entry<String, Group1Element> entrada : k.getVY().entrySet()) {
-					String clave = entrada.getKey();
-					Group1Element valor = entrada.getValue();
-					System.out.println("Clave: " + clave + ", Valor: " + valor.toProto().toString());
-				}
-
+				PublicKeyVerifier<?> publicKeyVerifier = PublicKeyVerifierFactory.publicKeyVerifierForKey(this.getKeyTypeName(), algorithm, this.getPublicKey());
 				boolean verified = publicKeyVerifier.verify(this.getContentPsms(), signature, algorithm);
-				assertTrue(true);
-
-				 */
+				assertTrue(verified);
 			} else {
 				byte[] signature = privateKeySigner.sign(this.getContent(), algorithm);
 				PublicKeyVerifier<?> publicKeyVerifier = PublicKeyVerifierFactory.publicKeyVerifierForKey(this.getKeyTypeName(), algorithm, this.getPublicKey());

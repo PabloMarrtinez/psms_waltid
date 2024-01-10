@@ -25,9 +25,9 @@ public class PsmsBlsSignatureProof2022SignatureSuite extends SignatureSuite {
                 // proofAlgorithm -> URI that identify the algorithm to sign and verify
                 URI.create("https://w3id.org/security#ed25519"),
                 // keyTypeNames -> List of KeyTypeNames, which are identifiers of the key types supported by the signing suite.
-                List.of(KeyTypeName.PSMS),
+                List.of(KeyTypeName.PsmsBlsSignature2022Proof),
                 // jwsAlgorithmForKeyTypeName -> Map that link each keytype to a list of JWS algorithmes
-                Map.of(KeyTypeName.PSMS, List.of(JWSAlgorithm.PSMSAlg)),
+                Map.of(KeyTypeName.PsmsBlsSignature2022Proof, List.of(JWSAlgorithm.PSMSAlg)),
                 // supportedJsonLDContexts -> List of JSON-LD context that the suite allow
                 Arrays.asList(LDSecurityContexts.JSONLD_CONTXT_WEID_SUITES_PSMS_BLS, LDSecurityContexts.JSONLD_CONTXT_CITIZENSHIP_V1));
     }

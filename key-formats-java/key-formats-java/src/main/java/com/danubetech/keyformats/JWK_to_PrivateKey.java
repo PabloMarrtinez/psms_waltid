@@ -68,13 +68,12 @@ public class JWK_to_PrivateKey {
 			return JWK_to_P_256PrivateKey(jsonWebKey);
 		else if (keyType == KeyTypeName.P_384)
 			return JWK_to_P_384PrivateKey(jsonWebKey);
-		else if (keyType == KeyTypeName.PSMS)
+		else if (keyType == KeyTypeName.PsmsBlsSignature2022)
 			return JWK_to_PsmsBlsPrivateKey(jsonWebKey);
 		else
 			throw new IllegalArgumentException("Unsupported key type: " + keyType);
 	}
-
-	public static final PairingBuilder builder = new PairingBuilderBLS461();
+	
 
 	public static KeyPair JWK_to_RSAPrivateKey(JWK jsonWebKey) {
 
@@ -225,15 +224,9 @@ public class JWK_to_PrivateKey {
 
 
 	public static MSprivateKey JWK_to_PsmsBlsPrivateKey(JWK jsonWebKey) {
+		if (! KeyType.EC.equals(jsonWebKey.getKty())) throw new IllegalArgumentException("Incorrect key type: " + jsonWebKey.getKty());
+		if (! Curve.PSMS.equals(jsonWebKey.getCrv())) throw new IllegalArgumentException("Incorrect curve: " + jsonWebKey.getCrv());
 
-
-        String kty = jsonWebKey.getKty();
-		String crv = jsonWebKey.getCrv();
-
-		if (!"EC".equals(kty)) throw new IllegalArgumentException("Incorrect key type: " + kty);
-		if (!"PSMS".equals(crv)) throw new IllegalArgumentException("Incorrect curve: " + crv);
-
-		// CONSTRUCCION DE zpElement con el valor x
 		byte[] decode_bytes_x = Base64.getDecoder().decode(jsonWebKey.getX());
 		ByteString byteString_x = ByteString.copyFrom(decode_bytes_x);
 		PabcSerializer.ZpElement zpElementProto_x = PabcSerializer.ZpElement.newBuilder()
@@ -242,8 +235,6 @@ public class JWK_to_PrivateKey {
 		ZpElementBLS461 zpElement_x = new ZpElementBLS461(zpElementProto_x);
 
 
-		// CONSTRUCCION DE zpElement con el valor y_m
-
 		byte[] decode_bytes_ym = Base64.getDecoder().decode(jsonWebKey.getY_m());
 		ByteString byteString_ym = ByteString.copyFrom(decode_bytes_ym);
 		PabcSerializer.ZpElement zpElementProto_ym = PabcSerializer.ZpElement.newBuilder()
@@ -251,7 +242,6 @@ public class JWK_to_PrivateKey {
 				.build();
 		ZpElementBLS461 zpElement_ym = new ZpElementBLS461(zpElementProto_ym);
 
-		// CONSTRUCCION de epoch
 
 		byte[] decode_bytes_epoch = Base64.getDecoder().decode(jsonWebKey.getEpoch());
 		ByteString byteString_epoch = ByteString.copyFrom(decode_bytes_epoch);

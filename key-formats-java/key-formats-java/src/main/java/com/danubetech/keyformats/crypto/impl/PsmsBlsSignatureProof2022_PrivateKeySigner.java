@@ -34,7 +34,7 @@ public class PsmsBlsSignatureProof2022_PrivateKeySigner extends PrivateKeySigner
     public byte[] sign(byte[] content) throws GeneralSecurityException {
         MSsignature signature = PsmsUmuUtils.getSignature(this.credential);
         String s = new String(content, StandardCharsets.UTF_8);
-        Map<String, String> diggest = PsmsUmuUtils.getDiggest(s);
+        Map<String, String> diggest = PsmsUmuUtils.getDigest(s);
         Map<String, ZpElement> values = PsmsUmuUtils.zkp_Attributes(diggest);
         int seedLength = PsmsUmuUtils.FIELD_BYTES;
         RAND rng = new RAND();

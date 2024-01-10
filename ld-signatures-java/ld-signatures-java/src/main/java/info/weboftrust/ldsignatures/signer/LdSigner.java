@@ -92,7 +92,6 @@ public abstract class LdSigner<SIGNATURESUITE extends SignatureSuite> {
         byte[] canonicalizationResult = this.getCanonicalizer().canonicalize(ldProof, jsonLdObject);
 
 
-
         // sign
 
         LdProof.Builder<? extends LdProof.Builder<?>> ldProofBuilder = LdProof.builder()

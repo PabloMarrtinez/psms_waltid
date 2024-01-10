@@ -50,7 +50,6 @@ public class PsmsBlsSignatureProof2022LdVerifier extends LdVerifier<PsmsBlsSigna
         String proofValue = ldProof.getProofValue();
         if (proofValue == null) throw new GeneralSecurityException("No 'proofValue' in proof.");
         byte[] bytes = Multibase.decode(proofValue);
-        System.out.println("content_included: "+content_excluded);
         return verifier.verify(content_excluded.getBytes(StandardCharsets.UTF_8), bytes, Curve.PSMS);
     }
 

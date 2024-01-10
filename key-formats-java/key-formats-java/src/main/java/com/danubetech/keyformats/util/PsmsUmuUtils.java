@@ -31,7 +31,7 @@ public class PsmsUmuUtils {
 
 
 
-    public static Map<String, String> getDiggest(String input) {
+    public static Map<String, String> getDigest(String input) {
         Map<String, String> attributeValues = new HashMap<>();
         String[] lines = input.split("\n");
         Pattern pattern = Pattern.compile("<[^>]+>\\s+<([^>]+)>\\s+(\\\"[^\\\"]+\\\"|<([^>]+)>)(?:\\^\\^<([^>]+)>)?\\s*\\.");

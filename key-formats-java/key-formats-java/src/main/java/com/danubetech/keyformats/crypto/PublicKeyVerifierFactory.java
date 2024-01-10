@@ -61,10 +61,10 @@ public class PublicKeyVerifierFactory {
         } else if (KeyTypeName.P_521.equals(keyTypeName)) {
 
             if (JWSAlgorithm.ES512.equals(algorithm)) return new P_521_ES512_PublicKeyVerifier((ECPublicKey) publicKey);
-        }else if (KeyTypeName.PSMS.equals(keyTypeName)) {
+        }else if (KeyTypeName.PsmsBlsSignature2022.equals(keyTypeName)) {
 
             if (JWSAlgorithm.PSMSAlg.equals(algorithm)) return new PsmsBlsSignature2022_PublicKeyVerifier((PSverfKey) publicKey);
-        }else if (KeyTypeName.PSMSPROOF.equals(keyTypeName)) {
+        }else if (KeyTypeName.PsmsBlsSignature2022Proof.equals(keyTypeName)) {
 
             if (JWSAlgorithm.PSMSAlgProof.equals(algorithm)) return new PsmsBlsSignatureProof2022_PublicKeyVerifier((PSverfKey) publicKey, null,null);
         }
