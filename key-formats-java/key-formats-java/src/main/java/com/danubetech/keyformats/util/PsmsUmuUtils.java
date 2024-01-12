@@ -1,6 +1,7 @@
 package com.danubetech.keyformats.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.InvalidProtocolBufferException;
 import foundation.identity.jsonld.JsonLDObject;
@@ -15,6 +16,7 @@ import inf.um.protos.PabcSerializer;
 import inf.um.psmultisign.PSsignature;
 import org.miracl.core.BLS12461.CONFIG_BIG;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,23 +78,55 @@ public class PsmsUmuUtils {
         return attrNames;
     }
 
-    public static MSsignature getSignature(JsonLDObject credential) {
+    public static PSsignature getSignature(JsonLDObject credential) {
         String json = credential.toString(); // Reemplaza esto con tu método para obtener el JSON como String
         ObjectMapper mapper = new ObjectMapper();
 
-        Map<String, Object> map = null;
-        Map<String, Object> jsonMap = null;
         try {
-            jsonMap = mapper.readValue(json, Map.class);
-            String proofValue = (String) jsonMap.get("proofValue");
+            Map<String, Object> jsonMap = mapper.readValue(json, Map.class);
+
+            Map<String, Object> proofMap = (Map<String, Object>) jsonMap.get("proof");
+            if (proofMap == null) {
+                throw new RuntimeException("Proof field not found in the credential");
+            }
+
+            String proofValue = (String) proofMap.get("proofValue");
+            if (proofValue == null) {
+                throw new RuntimeException("ProofValue field not found in the proof");
+            }
+
             byte[] decodedBytes = Multibase.decode(proofValue);
             PabcSerializer.PSsignature protoSignature = PabcSerializer.PSsignature.parseFrom(decodedBytes);
             return new PSsignature(protoSignature);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error processing JSON", e);
         } catch (InvalidProtocolBufferException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error processing protocol buffer", e);
+        }
+    }
+
+    public static Set<String> extractFields(String json) {
+        Set<String> fields = new HashSet<>();
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            JsonNode rootNode = mapper.readTree(json);
+            JsonNode credentialSubjectNode = rootNode.path("credentialSubject");
+
+            if (credentialSubjectNode.isObject()) {
+                Iterator<Map.Entry<String, JsonNode>> fieldsIterator = credentialSubjectNode.fields();
+                while (fieldsIterator.hasNext()) {
+                    Map.Entry<String, JsonNode> field = fieldsIterator.next();
+                    if (!field.getKey().equals("@explicit")) { // Ignorando la clave @explicit
+                        fields.add(field.getKey());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
+        return fields;
     }
+
 }

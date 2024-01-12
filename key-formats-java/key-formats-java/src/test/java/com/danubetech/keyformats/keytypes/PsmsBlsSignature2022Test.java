@@ -5,13 +5,20 @@ import com.danubetech.keyformats.JWK_to_PublicKey;
 import com.danubetech.keyformats.jose.JWK;
 import com.danubetech.keyformats.jose.JWSAlgorithm;
 import com.danubetech.keyformats.jose.KeyTypeName;
+import inf.um.multisign.MS;
+import inf.um.multisign.MSauxArg;
+import inf.um.multisign.MSprivateKey;
+import inf.um.multisign.MSverfKey;
+import inf.um.psmultisign.PSauxArg;
+import inf.um.psmultisign.PSms;
+import inf.um.util.Pair;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PsmsBlsSignature2022Test extends AbstractTest{
 
@@ -74,7 +81,34 @@ public class PsmsBlsSignature2022Test extends AbstractTest{
 
     @Test
     public void testPublicKey() throws Exception {
+        MS psScheme=new PSms();
+        Set<String> attrNames=new HashSet<>(Arrays.asList(
+                "http://schema.org/birthDate",
+                "http://schema.org/familyName",
+                "http://schema.org/gender",
+                "http://schema.org/givenName",
+                "http://schema.org/image",
+                "https://w3id.org/citizenship#birthCountry",
+                "https://w3id.org/citizenship#commuterClassification",
+                "https://w3id.org/citizenship#lprCategory",
+                "https://w3id.org/citizenship#lprNumber",
+                "https://w3id.org/citizenship#residentSince",
+                "http://schema.org/description",
+                "http://schema.org/name",
+                "https://www.w3.org/2018/credentials#issuanceDate",
+                "https://www.w3.org/2018/credentials#credentialSubject",
+                "https://www.w3.org/2018/credentials#expirationDate",
+                "https://www.w3.org/2018/credentials#issuer"));
 
-        assertEquals(true, true);
+        String PAIRING_NAME="inf.um.pairingBLS461.PairingBuilderBLS461";
+        MSauxArg auxArg=new PSauxArg(PAIRING_NAME,attrNames);
+        psScheme.setup(1,auxArg, "seed".getBytes());
+        Pair<MSprivateKey, MSverfKey> keys=psScheme.kg();
+        byte[] publicKey1 = keys.getSecond().getEncoded();
+
+        MSverfKey publicKey = JWK_to_PublicKey.JWK_to_Psms_PublicKey(jwkPublic);
+        byte[] publicKey2 = publicKey.getEncoded();
+        boolean areEqual = Arrays.equals(publicKey1, publicKey2);
+        assertTrue(areEqual);
     }
 }

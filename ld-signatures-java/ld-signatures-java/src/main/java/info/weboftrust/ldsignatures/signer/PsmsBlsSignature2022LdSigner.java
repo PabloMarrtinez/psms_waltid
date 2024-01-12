@@ -36,17 +36,13 @@ public class PsmsBlsSignature2022LdSigner extends LdSigner<PsmsBlsSignature2022S
 
     public static void sign(LdProof.Builder<? extends LdProof.Builder<?>> ldProofBuilder, byte[] signingInput, ByteSigner signer) throws GeneralSecurityException {
 
-        // build the JWS and sign
         String content = new String(signingInput);
         String content_excluded = PsmsBlsUmuUtil.processRdfData(content);
         byte[] bytes = signer.sign(content_excluded.getBytes(StandardCharsets.UTF_8), Curve.PSMS);
 
         String proofValue = Multibase.encode(Multibase.Base.Base58BTC, bytes);
-        // add JSON-LD context
 
         //ldProofBuilder.contexts(Arrays.asList(LDSecurityContexts.JSONLD_CONTXT_WEID_SUITES_PSMS_BLS, LDSecurityContexts.JSONLD_CONTXT_CITIZENSHIP_V1, LDSecurityContexts.JSONLD_CONTXT_CREDENTIALS_2018));
-
-        // done
 
         ldProofBuilder.proofValue(proofValue);
 

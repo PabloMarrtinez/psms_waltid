@@ -11,6 +11,7 @@ public class PsmsBlsUmuUtil {
             "https://w3id.org/security#proofPurpose",
             "https://w3id.org/security#verificationMethod"
     ));
+
     public static String processRdfData(String rdfData) {
         StringBuilder result = new StringBuilder();
         String[] lines = rdfData.split("\n");

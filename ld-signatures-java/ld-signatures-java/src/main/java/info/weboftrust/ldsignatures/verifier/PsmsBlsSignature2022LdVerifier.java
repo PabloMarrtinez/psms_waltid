@@ -48,7 +48,6 @@ public class PsmsBlsSignature2022LdVerifier extends LdVerifier<PsmsBlsSignature2
     public static boolean verify(byte[] signingInput, LdProof ldProof, ByteVerifier verifier) throws GeneralSecurityException {
         String content = new String(signingInput);
         String content_excluded = PsmsBlsUmuUtil.processRdfData(content);
-
         String proofValue = ldProof.getProofValue();
         if (proofValue == null) throw new GeneralSecurityException("No 'proofValue' in proof.");
         byte[] bytes = Multibase.decode(proofValue);

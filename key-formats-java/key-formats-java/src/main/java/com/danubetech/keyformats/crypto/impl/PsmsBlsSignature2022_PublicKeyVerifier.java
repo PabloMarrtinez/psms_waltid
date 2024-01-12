@@ -33,10 +33,10 @@ public class PsmsBlsSignature2022_PublicKeyVerifier extends PublicKeyVerifier<MS
         try {
             PabcSerializer.PSsignature protoSignature = PabcSerializer.PSsignature.parseFrom(signature);
             MSsignature sign = new PSsignature(protoSignature);
-            String s = new String(content, StandardCharsets.UTF_8);
+            String content_string = new String(content, StandardCharsets.UTF_8);
 
 
-            Map<String, String> digest = PsmsUmuUtils.getDigest(s);
+            Map<String, String> digest = PsmsUmuUtils.getDigest(content_string);
             Map<String, ZpElement> values = PsmsUmuUtils.zkp_Attributes(digest);
 
             int seedLength = PsmsUmuUtils.FIELD_BYTES;
@@ -46,8 +46,7 @@ public class PsmsBlsSignature2022_PublicKeyVerifier extends PublicKeyVerifier<MS
             rng.seed(seedLength,raw);
             ZpElement epoch=new ZpElementBLS461(new BIG(123456789));
             MS psScheme=new PSms();
-
-            MSauxArg auxArg=new PSauxArg(PsmsUmuUtils.PAIRING_NAME,PsmsUmuUtils.getAttrNames(s));
+            MSauxArg auxArg=new PSauxArg(PsmsUmuUtils.PAIRING_NAME,PsmsUmuUtils.getAttrNames(content_string));
             try {
                 psScheme.setup(1, auxArg, PsmsUmuUtils.seed);
             } catch (MSSetupException e) {

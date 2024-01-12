@@ -19,34 +19,33 @@ import java.util.Map;
 
 public class PsmsBlsSignatureProof2022LdVerifier extends LdVerifier<PsmsBlsSignatureProof2022SignatureSuite>{
 
-    private static Map<String,String> zkpFields;
-    public PsmsBlsSignatureProof2022LdVerifier(ByteVerifier verifier,Map<String,String> zkpfields) {
+    private static String zkpFields;
+    public PsmsBlsSignatureProof2022LdVerifier(ByteVerifier verifier,String zkpfields) {
 
         super(SignatureSuites.SIGNATURE_SUITE_PSMSBLSSIGNATUREPROOF2022, verifier, new URDNA2015UmuCanonicalizer());
         zkpFields = zkpfields;
     }
 
-    public PsmsBlsSignatureProof2022LdVerifier(MSverfKey publicKey, String nonce, Map<String,String> zkpFields) {
+    public PsmsBlsSignatureProof2022LdVerifier(MSverfKey publicKey, String nonce, String zkpFields) {
 
         this(new PsmsBlsSignatureProof2022_PublicKeyVerifier(publicKey,nonce, zkpFields),zkpFields);
     }
 
-    public static Map<String, String> getZkpFields() {
+    public static String getZkpFields() {
         return zkpFields;
     }
 
-    public static void setZkpFields(Map<String, String> zkpFields) {
+    public static void setZkpFields(String zkpFields) {
         PsmsBlsSignatureProof2022LdVerifier.zkpFields = zkpFields;
     }
 
-    public PsmsBlsSignatureProof2022LdVerifier(Map<String,String> zkpfields) {
+    public PsmsBlsSignatureProof2022LdVerifier(String zkpfields) {
 
         this(null, zkpfields);
     }
 
     public static boolean verify(byte[] signingInput, LdProof ldProof, ByteVerifier verifier) throws GeneralSecurityException {
-        String content = new String(signingInput);
-        String content_excluded = PsmsBlsUmuUtil.zkp_fields(content,getZkpFields().keySet());
+        String content_excluded = PsmsBlsUmuUtil.processRdfData(new String(signingInput));
         String proofValue = ldProof.getProofValue();
         if (proofValue == null) throw new GeneralSecurityException("No 'proofValue' in proof.");
         byte[] bytes = Multibase.decode(proofValue);

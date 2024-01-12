@@ -225,7 +225,7 @@ public class JWK_to_PrivateKey {
 
 	public static MSprivateKey JWK_to_PsmsBlsPrivateKey(JWK jsonWebKey) {
 		if (! KeyType.EC.equals(jsonWebKey.getKty())) throw new IllegalArgumentException("Incorrect key type: " + jsonWebKey.getKty());
-		if (! Curve.PSMS.equals(jsonWebKey.getCrv())) throw new IllegalArgumentException("Incorrect curve: " + jsonWebKey.getCrv());
+		if (! (Curve.PSMS.equals(jsonWebKey.getCrv()) || Curve.PSMSPROOF.equals(jsonWebKey.getCrv())))  throw new IllegalArgumentException("Incorrect curve: " + jsonWebKey.getCrv());
 
 		byte[] decode_bytes_x = Base64.getDecoder().decode(jsonWebKey.getX());
 		ByteString byteString_x = ByteString.copyFrom(decode_bytes_x);

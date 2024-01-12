@@ -47,20 +47,13 @@ public abstract class LdVerifier<SIGNATURESUITE extends SignatureSuite> {
     public boolean verify(JsonLDObject jsonLdObject, LdProof ldProof) throws IOException, GeneralSecurityException, JsonLDException {
 
         // check the proof object
-
         if (!this.getSignatureSuite().getTerm().equals(ldProof.getType()))
             throw new GeneralSecurityException("Unexpected signature type: " + ldProof.getType() + " is not " + this.getSignatureSuite().getTerm());
-
         // obtain the canonicalized document
-
         byte[] canonicalizationResult = this.getCanonicalizer().canonicalize(ldProof, jsonLdObject);
-
         // verify
-
         boolean verify = this.verify(canonicalizationResult, ldProof);
-
         // done
-
         return verify;
     }
 

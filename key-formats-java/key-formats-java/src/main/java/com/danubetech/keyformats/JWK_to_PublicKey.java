@@ -224,7 +224,7 @@ public class JWK_to_PublicKey {
 
 	public static PSverfKey JWK_to_Psms_PublicKey(JWK jsonWebKey) {
 		if (! KeyType.EC.equals(jsonWebKey.getKty())) throw new IllegalArgumentException("Incorrect key type: " + jsonWebKey.getKty());
-		if (! Curve.PSMS.equals(jsonWebKey.getCrv())) throw new IllegalArgumentException("Incorrect curve: " + jsonWebKey.getCrv());
+		if (! (Curve.PSMS.equals(jsonWebKey.getCrv()) || Curve.PSMSPROOF.equals(jsonWebKey.getCrv()))) throw new IllegalArgumentException("Incorrect curve: " + jsonWebKey.getCrv());
 
 		try {
 			return new PSverfKey(jsonWebKey.getPublic_key());

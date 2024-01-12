@@ -37,9 +37,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 public class JsonLdSignPsmsBlsSignatureTest {
 
-    private static final String zkp_fields_json = "{"
+    String zkp_fields_json = "{"
             + "\"@context\":[\"https://www.w3.org/2018/credentials/v1\",\"https://w3id.org/citizenship/v1\",\"https://ssiproject.inf.um.es/security/psms/v1\"], "
-            + "\"credentialSubject\":{\"@explicit\":true, \"birthCountry\":{},\"familyName\":{}},"
+            + "\"credentialSubject\":{\"@explicit\":true, \"https://w3id.org/citizenship#birthCountry\":{},\"https://www.w3.org/2018/credentials#credentialSubject\":{},\"http://schema.org/familyName\":{}},"
             + "\"expirationDate\":{},"
             + "\"issuer\":{}, "
             + "\"type\":[\"VerifiableCredential\",\"PermanentResidentCard\"]"
@@ -58,8 +58,8 @@ public class JsonLdSignPsmsBlsSignatureTest {
     public void testSign() throws Throwable {
 
         // Leo el documento JSON
-        JsonLDObject jsonLdObject = JsonLDObject.fromJson(new InputStreamReader(Objects.requireNonNull(JsonLdSignPsmsBlsSignatureTest.class.getResourceAsStream("vc_umu.jsonld"))));
-        jsonLdObject.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
+        JsonLDObject credential = JsonLDObject.fromJson(new InputStreamReader(Objects.requireNonNull(JsonLdSignPsmsBlsSignatureTest.class.getResourceAsStream("vc_umu.jsonld"))));
+        credential.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
 
         MS psScheme=new PSms();
 
@@ -95,43 +95,31 @@ public class JsonLdSignPsmsBlsSignatureTest {
         PsmsBlsSignature2022LdVerifier verifier = new PsmsBlsSignature2022LdVerifier(keys.getSecond());
 
 
-        System.out.println(jsonLdObject);
-        LdProof ldProof = signer.sign(jsonLdObject);
-        System.out.println(jsonLdObject);
-        System.out.println("-----------------------------");
-        boolean verify = verifier.verify(jsonLdObject,ldProof);
+        LdProof ldProof = signer.sign(credential);
+        boolean verify = verifier.verify(credential,ldProof);
         assertTrue(verify);
-
-
-
-
-
-
-
-
-
-
-/*
 
         // CREDENTIAL /
 
-        JsonLDObject zkp_fields = JsonLDObject.fromJson(new InputStreamReader(Objects.requireNonNull(JsonLdSignPsmsBlsSignatureTest.class.getResourceAsStream("zkp_fields.jsonld"))));
-        zkp_fields.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
-        System.out.println(zkp_fields);
+        JsonLDObject presentation = JsonLDObject.fromJson(new InputStreamReader(Objects.requireNonNull(JsonLdSignPsmsBlsSignatureTest.class.getResourceAsStream("vc_presentation_zkp.jsonld"))));
+        presentation.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
         String nonce = "123456789";
 
-        PsmsBlsSignatureProof2022LdSigner signerProof = new PsmsBlsSignatureProof2022LdSigner((PSverfKey) keys.getSecond(),nonce,zkpFields,ldProof);
-        PsmsBlsSignatureProof2022LdVerifier verifierProof = new PsmsBlsSignatureProof2022LdVerifier(keys.getSecond(), nonce, zkpFields);
-        LdProof zkproof = signerProof.sign(jsonLdObject2);
 
-        System.out.println("Credential: "+jsonLdObject2);
-        System.out.println("zkproof: "+zkproof);
+        PsmsBlsSignatureProof2022LdSigner signerProof = new PsmsBlsSignatureProof2022LdSigner((PSverfKey) keys.getSecond(),nonce,zkp_fields_json, credential);
+        PsmsBlsSignatureProof2022LdVerifier verifierProof = new PsmsBlsSignatureProof2022LdVerifier(keys.getSecond(), nonce, zkp_fields_json);
 
-        boolean verifyProof = verifierProof.verify(jsonLdObject2,zkproof);
+        LdProof zkproof = signerProof.sign(presentation);
+        boolean verifyProof = verifierProof.verify(presentation,zkproof);
         assertTrue(verifyProof);
 
 
- */
+
+
+
+
+
+
 
 
 
