@@ -81,7 +81,18 @@ public class JsonLdSignPsmsBlsSignatureTest {
                 "https://www.w3.org/2018/credentials#expirationDate",
                 "https://www.w3.org/2018/credentials#issuer"));
 
-
+        Set<String> attrNames_credential_subject =new HashSet<>(Arrays.asList(
+                "http://schema.org/birthDate",
+                "http://schema.org/familyName",
+                "http://schema.org/gender",
+                "http://schema.org/givenName",
+                "http://schema.org/image",
+                "https://w3id.org/citizenship#birthCountry",
+                "https://w3id.org/citizenship#commuterClassification",
+                "https://w3id.org/citizenship#lprCategory",
+                "https://w3id.org/citizenship#lprNumber",
+                "https://w3id.org/citizenship#residentSince"
+        ));
 
 
         String PAIRING_NAME="inf.um.pairingBLS461.PairingBuilderBLS461";
@@ -91,6 +102,21 @@ public class JsonLdSignPsmsBlsSignatureTest {
 
 
         Pair<MSprivateKey,MSverfKey> keys=psScheme.kg();
+
+        PSverfKey publick = (PSverfKey) keys.getSecond();
+        System.out.println("Public:"+Base64.getEncoder().encodeToString(publick.getEncoded()));
+
+        PSprivateKey privatek = (PSprivateKey) keys.getFirst();
+        System.out.println("Private");
+        System.out.println("getx: "+Base64.getEncoder().encodeToString(privatek.getX().toBytes()));
+        System.out.println("y_epoch: "+Base64.getEncoder().encodeToString(privatek.getY_epoch().toBytes()));
+        System.out.println("y_m: "+Base64.getEncoder().encodeToString(privatek.getY_m().toBytes()));
+
+        Map <String,ZpElement> y = privatek.getY();
+        for (Map.Entry<String, ZpElement> entry : y.entrySet()) {
+            System.out.println(entry.getKey()+" : "+Base64.getEncoder().encodeToString(entry.getValue().toBytes()));
+        }
+
         PsmsBlsSignature2022LdSigner signer = new PsmsBlsSignature2022LdSigner(keys.getFirst());
         PsmsBlsSignature2022LdVerifier verifier = new PsmsBlsSignature2022LdVerifier(keys.getSecond());
 

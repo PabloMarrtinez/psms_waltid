@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.util.Date;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AttributeDefinitionDate extends AttributeDefinition {
+public class  AttributeDefinitionDate extends AttributeDefinition {
     @JsonProperty("type") //Needed because of issue in Jackson with serialization of collections
     private final String type= "Date";
     private static final AttributeType TYPE= AttributeType.DATE;

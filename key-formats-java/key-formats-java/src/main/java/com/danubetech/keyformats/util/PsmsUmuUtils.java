@@ -34,6 +34,7 @@ public class PsmsUmuUtils {
 
 
     public static Map<String, String> getDigest(String input) {
+        System.out.println(input);
         Map<String, String> attributeValues = new HashMap<>();
         String[] lines = input.split("\n");
         Pattern pattern = Pattern.compile("<[^>]+>\\s+<([^>]+)>\\s+(\\\"[^\\\"]+\\\"|<([^>]+)>)(?:\\^\\^<([^>]+)>)?\\s*\\.");
@@ -49,6 +50,28 @@ public class PsmsUmuUtils {
         return attributeValues;
     }
 
+/*
+    public static Map<String, String> getDigest(String input) {
+        System.out.println(input);
+        Map<String, String> attributeValues = new HashMap<>();
+        String[] lines = input.split("\n");
+        Pattern pattern = Pattern.compile("(<did:example:[^>]+>)\\s+<([^>]+)>\\s+(\\\"[^\\\"]+\\\"|<([^>]+)>)(?:\\^\\^<([^>]+)>)?\\s*\\.");
+        for (String line : lines) {
+            Matcher matcher = pattern.matcher(line);
+            if (matcher.find()) {
+                String subject = matcher.group(1);
+                String attribute = matcher.group(2);
+                String value = matcher.group(3);
+                System.out.println(attribute+" : "+value);
+                if (subject.startsWith("<did:example:")) {
+                    attributeValues.put(attribute, value);
+                }
+            }
+        }
+        return attributeValues;
+    }
+*/
+
     public static Map<String, ZpElement> zkp_Attributes(Map<String, String> input) {
         Map<String, ZpElement> attributeValues = new HashMap<>();
         for (Map.Entry<String, String> entry : input.entrySet()) {
@@ -57,6 +80,7 @@ public class PsmsUmuUtils {
             Attribute attr_value = new Attribute(attrValue);
             AttributeDefinition attr_def = new AttributeDefinitionString(attrDef,attrDef,1,10000);
             ZpElement zpElement = builder.getZpElementFromAttribute(attr_value, attr_def);
+            System.out.println(attrDef);
             attributeValues.put(attrDef, zpElement);
         }
         return attributeValues;
@@ -77,6 +101,23 @@ public class PsmsUmuUtils {
         }
         return attrNames;
     }
+
+
+/*
+    public static Set<String> getAttrNames(String input) {
+        Set<String> attrNames = new HashSet<>();
+        String[] lines = input.split("\n");
+        Pattern pattern = Pattern.compile("(<did:example:[^>]+>)\\s+<([^>]+)>\\s+(\\\"[^\\\"]+\\\"|<([^>]+)>)(?:\\^\\^<([^>]+)>)?\\s*\\.");
+        for (String line : lines) {
+            Matcher matcher = pattern.matcher(line);
+            if (matcher.find()) {
+                String attribute = matcher.group(1);
+                attrNames.add(attribute);
+            }
+        }
+        return attrNames;
+    }
+*/
 
     public static PSsignature getSignature(JsonLDObject credential) {
         String json = credential.toString(); // Reemplaza esto con tu método para obtener el JSON como String
