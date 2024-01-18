@@ -66,7 +66,7 @@ public class PublicKeyVerifierFactory {
             if (JWSAlgorithm.PSMSAlg.equals(algorithm)) return new PsmsBlsSignature2022_PublicKeyVerifier((PSverfKey) publicKey);
         }else if (KeyTypeName.PsmsBlsSignature2022Proof.equals(keyTypeName)) {
 
-            if (JWSAlgorithm.PSMSAlgProof.equals(algorithm)) return new PsmsBlsSignatureProof2022_PublicKeyVerifier((PSverfKey) publicKey, null,null);
+            if (JWSAlgorithm.PSMSAlgProof.equals(algorithm)) return new PsmsBlsSignatureProof2022_PublicKeyVerifier((PSverfKey) publicKey, null);
         }
 
         throw new IllegalArgumentException("Unsupported public key " + keyTypeName + " and/or algorithm " + algorithm);

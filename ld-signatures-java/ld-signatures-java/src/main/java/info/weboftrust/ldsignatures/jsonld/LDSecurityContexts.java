@@ -29,6 +29,9 @@ public class LDSecurityContexts {
     public static final URI JSONLD_CONTXT_CREDENTIALS_2018 = URI.create("https://www.w3.org/2018/credentials/v1");
     public static final URI JSONLD_CONTXT_CITIZENSHIP_V1 = URI.create("https://w3id.org/citizenship/v1");
 
+    public static final URI JSONLD_CONTXT_CREDENTIALS_EXAMPLES_V2 = URI.create("https://www.w3.org/ns/credentials/examples/v2");
+    public static final URI JSONLD_CONTXT_CREDENTIALS_V2 = URI.create("https://www.w3.org/ns/credentials/v2");
+
     public static final Map<URI, JsonDocument> CONTEXTS;
     public static final DocumentLoader DOCUMENT_LOADER;
 
@@ -62,7 +65,10 @@ public class LDSecurityContexts {
                     JsonDocument.of(MediaType.JSON_LD, Objects.requireNonNull(LDSecurityContexts.class.getResourceAsStream("credentials_v1_2018_umu.jsonld"))));
             CONTEXTS.put(JSONLD_CONTXT_CITIZENSHIP_V1,
                     JsonDocument.of(MediaType.JSON_LD, Objects.requireNonNull(LDSecurityContexts.class.getResourceAsStream("citizenship_v1_umu.jsonld"))));
-
+            CONTEXTS.put(JSONLD_CONTXT_CREDENTIALS_EXAMPLES_V2,
+                    JsonDocument.of(MediaType.JSON_LD, Objects.requireNonNull(LDSecurityContexts.class.getResourceAsStream("w3_ns_credential_examples_v2.jsonld"))));
+            CONTEXTS.put(JSONLD_CONTXT_CREDENTIALS_V2,
+                    JsonDocument.of(MediaType.JSON_LD, Objects.requireNonNull(LDSecurityContexts.class.getResourceAsStream("w3_ns_credential_v2.jsonld"))));
             for (Map.Entry<URI, JsonDocument> context : CONTEXTS.entrySet()) {
                 context.getValue().setDocumentUrl(context.getKey());
             }

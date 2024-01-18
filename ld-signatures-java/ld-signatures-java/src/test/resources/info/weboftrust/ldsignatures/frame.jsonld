@@ -1,0 +1,9 @@
+{
+    "@context": {
+        "name": "http://schema.org/name",
+        "author": "http://schema.org/author",
+        "Book": "http://schema.org/Book"
+    },
+    "@type": "Book",
+    "title": "JSON-LD Framing"
+}

@@ -268,6 +268,11 @@
 			<artifactId>PsmsLibrary</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.apicatalog</groupId>
+			<artifactId>titanium-json-ld</artifactId>
+			<version>1.3.3</version>
+		</dependency>
 	</dependencies>
 
 </project>

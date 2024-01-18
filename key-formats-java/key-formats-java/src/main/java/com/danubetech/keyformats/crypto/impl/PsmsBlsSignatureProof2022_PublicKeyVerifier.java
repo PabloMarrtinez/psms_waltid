@@ -20,13 +20,13 @@ import java.util.*;
 public class PsmsBlsSignatureProof2022_PublicKeyVerifier extends PublicKeyVerifier<MSverfKey> {
 
     private String nonce;
-    private String zkpfields;
 
-    public PsmsBlsSignatureProof2022_PublicKeyVerifier(MSverfKey publicKey,String n, String zkpf) {
+
+    public PsmsBlsSignatureProof2022_PublicKeyVerifier(MSverfKey publicKey,String n) {
 
         super(publicKey, Curve.PSMS);
         this.nonce = n;
-        this.zkpfields = zkpf;
+
     }
 
     @Override
@@ -35,20 +35,7 @@ public class PsmsBlsSignatureProof2022_PublicKeyVerifier extends PublicKeyVerifi
             PabcSerializer.PSzkToken zktoken = PabcSerializer.PSzkToken.parseFrom(signature);
             PSzkToken token = new PSzkToken(zktoken);
             Map<String, String> digest = PsmsUmuUtils.getDigest(new String(content, StandardCharsets.UTF_8));
-
             Map<String, ZpElement> values = PsmsUmuUtils.zkp_Attributes(digest);
-            String test =  "http://schema.org/familyName,https://www.w3.org/2018/credentials#credentialSubject,https://w3id.org/citizenship#birthCountry";
-            Set<String> hashSet = new HashSet<>(Arrays.asList(test.split(",")));
-
-
-            Map<String, ZpElement> filteredMap = new HashMap<>();
-
-            for (String key : values.keySet()) {
-                if (hashSet.contains(key)) {
-                    filteredMap.put(key, values.get(key));
-                }
-            }
-
 
             int seedLength = PsmsUmuUtils.FIELD_BYTES;
             RAND rng = new RAND();
@@ -58,19 +45,18 @@ public class PsmsBlsSignatureProof2022_PublicKeyVerifier extends PublicKeyVerifi
             ZpElement epoch=new ZpElementBLS461(new BIG(123456789));
             MS psScheme=new PSms();
 
-            Set<String> combinedKeySet = new HashSet<>();
-            combinedKeySet.addAll(token.getVaj().keySet());
-            combinedKeySet.addAll(values.keySet());
+            Set<String> all_attributes = new HashSet<>();
+            all_attributes.addAll(token.getVaj().keySet());
+            all_attributes.addAll(values.keySet());
 
-
-            MSauxArg auxArg=new PSauxArg(PsmsUmuUtils.PAIRING_NAME,combinedKeySet);
+            MSauxArg auxArg=new PSauxArg(PsmsUmuUtils.PAIRING_NAME,all_attributes);
             try {
                 psScheme.setup(1, auxArg, PsmsUmuUtils.seed);
             } catch (MSSetupException e) {
                 throw new RuntimeException(e);
             }
 
-            MSmessage mAttr=new PSmessage(filteredMap,epoch);
+            MSmessage mAttr=new PSmessage(values,epoch);
             return psScheme.verifyZKtoken(token,this.getPublicKey(),this.nonce, mAttr);
 
         } catch (InvalidProtocolBufferException e) {

@@ -36,17 +36,14 @@ public class PsmsBlsSignature2022_PrivateKeySigner extends PrivateKeySigner<MSpr
         rng.seed(seedLength,raw);
         ZpElement epoch=new ZpElementBLS461(new BIG(123456789));
         MS psScheme=new PSms();
-
-        MSauxArg auxArg=new PSauxArg(PsmsUmuUtils.PAIRING_NAME,PsmsUmuUtils.getAttrNames(content_string));
+        MSauxArg auxArg=new PSauxArg(PsmsUmuUtils.PAIRING_NAME,digest.keySet());
         try {
             psScheme.setup(1, auxArg, PsmsUmuUtils.seed);
         } catch (MSSetupException e) {
             throw new RuntimeException(e);
         }
-
         MSmessage mAttr=new PSmessage(values,epoch);
         PSsignature signature = (PSsignature) psScheme.sign(this.getPrivateKey(),mAttr);
-
         PabcSerializer.PSsignature protoSignature = signature.toProto();
 
         return protoSignature.toByteArray();

@@ -1,6 +1,7 @@
 package com.danubetech.keyformats.crypto.impl;
 
 import com.danubetech.keyformats.crypto.PrivateKeySigner;
+import com.danubetech.keyformats.crypto.PublicKeyProver;
 import com.danubetech.keyformats.jose.Curve;
 import com.danubetech.keyformats.util.PsmsUmuUtils;
 import inf.um.model.exceptions.MSSetupException;
@@ -21,24 +22,36 @@ import java.util.StringJoiner;
 
 import foundation.identity.jsonld.JsonLDObject;
 
-public class PsmsBlsSignatureProof2022_PrivateKeySigner extends PrivateKeySigner<MSverfKey> {
+public class PsmsBlsSignatureProof2022_PrivateKeySigner extends PublicKeyProver<MSverfKey> {
 
     private String nonce;
-    private String zkpfields;
+    private Set<String> zkp_fields;
     private  JsonLDObject credential;
-    public PsmsBlsSignatureProof2022_PrivateKeySigner(MSverfKey privateKey, String n, String zkpf, JsonLDObject credential) {
+    public PsmsBlsSignatureProof2022_PrivateKeySigner(MSverfKey privateKey, String n, JsonLDObject credential) {
 
         super(privateKey, Curve.PSMSPROOF);
         this.nonce = n;
-        this.zkpfields = zkpf;
         this.credential = credential;
+        this.zkp_fields = null;
     }
 
+    public Set<String> getZkp_fields() {
+        return zkp_fields;
+    }
+
+    public void setZkp_fields(Set<String> zkp_fields) {
+        this.zkp_fields = zkp_fields;
+    }
+
+
     @Override
-    public byte[] sign(byte[] content) throws GeneralSecurityException {
+    public byte[] sign(byte[] credential,byte[] presentation) throws GeneralSecurityException {
+        String content_string_zkpfields = new String(presentation, StandardCharsets.UTF_8);
+        Map<String, String> zkpfields = PsmsUmuUtils.getDigest(content_string_zkpfields);
+        setZkp_fields(zkpfields.keySet());
         MSsignature signature = PsmsUmuUtils.getSignature(this.credential);
 
-        String content_string = new String(content, StandardCharsets.UTF_8);
+        String content_string = new String(credential, StandardCharsets.UTF_8);
 
         Map<String, String> digest = PsmsUmuUtils.getDigest(content_string);
         Map<String, ZpElement> values = PsmsUmuUtils.zkp_Attributes(digest);
@@ -49,19 +62,19 @@ public class PsmsBlsSignatureProof2022_PrivateKeySigner extends PrivateKeySigner
         rng.seed(seedLength,raw);
         ZpElement epoch=new ZpElementBLS461(new BIG(123456789));
         MS psScheme=new PSms();
-        MSauxArg auxArg=new PSauxArg(PsmsUmuUtils.PAIRING_NAME,PsmsUmuUtils.getAttrNames(content_string));
+        MSauxArg auxArg=new PSauxArg(PsmsUmuUtils.PAIRING_NAME,digest.keySet());
         try {
             psScheme.setup(1, auxArg, PsmsUmuUtils.seed);
         } catch (MSSetupException e) {
             throw new RuntimeException(e);
         }
         MSmessage mAttr=new PSmessage(values,epoch);
-
-
-        PSzkToken token=(PSzkToken) psScheme.presentZKtoken(this.getPrivateKey(),PsmsUmuUtils.extractFields(this.zkpfields),mAttr,this.nonce,signature);
+        PSzkToken token=(PSzkToken) psScheme.presentZKtoken(this.getPrivateKey(),getZkp_fields(),mAttr,this.nonce,signature);
         PabcSerializer.PSzkToken zkToken = token.toProto();
 
 
         return zkToken.toByteArray();
     }
+
+
 }

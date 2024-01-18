@@ -88,13 +88,14 @@ public class PsmsBlsSignature2022Test extends AbstractTest{
     @Override
     Object getPrivateKey() {
         //return null;
-        return JWK_to_PrivateKey.JWK_to_PsmsBlsPrivateKey(jwkPrivate);
+        return JWK_to_PrivateKey.JWK_to_PsmsBlsPrivateKey(jwkPrivate2);
     }
 
     @Override
     Object getPublicKey() {
         //return null;
-        return JWK_to_PublicKey.JWK_to_Psms_PublicKey(jwkPublic);
+        return JWK_to_PublicKey.JWK_to_Psms_PublicKey(jwkPublic2
+        );
     }
 
 
@@ -133,12 +134,12 @@ public class PsmsBlsSignature2022Test extends AbstractTest{
         ));
 
         String PAIRING_NAME="inf.um.pairingBLS461.PairingBuilderBLS461";
-        MSauxArg auxArg=new PSauxArg(PAIRING_NAME,attrNames);
+        MSauxArg auxArg=new PSauxArg(PAIRING_NAME,attrNames_credential_subject);
         psScheme.setup(1,auxArg, "seed".getBytes());
         Pair<MSprivateKey, MSverfKey> keys=psScheme.kg();
         byte[] publicKey1 = keys.getSecond().getEncoded();
 
-        MSverfKey publicKey = JWK_to_PublicKey.JWK_to_Psms_PublicKey(jwkPublic);
+        MSverfKey publicKey = JWK_to_PublicKey.JWK_to_Psms_PublicKey(jwkPublic2);
         byte[] publicKey2 = publicKey.getEncoded();
         boolean areEqual = Arrays.equals(publicKey1, publicKey2);
         assertTrue(areEqual);

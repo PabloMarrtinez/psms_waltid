@@ -25,19 +25,6 @@ public class PsmsBlsUmuUtil {
         return result.toString();
     }
 
-    public static String zkp_fields(String rdfData, Set<String> includedPredicates) {
-        StringBuilder result = new StringBuilder();
-        String[] lines = rdfData.split("\n");
-
-        for (String line : lines) {
-            if (isLineExcluded(line, includedPredicates)) {
-                result.append(line).append("\n");
-            }
-        }
-
-        return result.toString();
-    }
-
     private static boolean isLineExcluded(String line, Set<String> predicates) {
         for (String predicate : predicates) {
             if (line.contains(predicate)) {

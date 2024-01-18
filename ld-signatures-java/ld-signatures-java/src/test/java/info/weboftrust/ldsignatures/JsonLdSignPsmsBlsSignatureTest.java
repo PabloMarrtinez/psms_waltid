@@ -1,155 +1,134 @@
 package info.weboftrust.ldsignatures;
 
+import com.apicatalog.jsonld.JsonLd;
+import com.apicatalog.jsonld.JsonLdOptions;
+import com.apicatalog.jsonld.document.Document;
+import com.apicatalog.jsonld.document.JsonDocument;
 import com.danubetech.keyformats.crypto.provider.Ed25519Provider;
 import com.danubetech.keyformats.crypto.provider.RandomProvider;
 import com.danubetech.keyformats.crypto.provider.SHA256Provider;
 import com.danubetech.keyformats.crypto.provider.impl.JavaRandomProvider;
 import com.danubetech.keyformats.crypto.provider.impl.JavaSHA256Provider;
 import com.danubetech.keyformats.crypto.provider.impl.TinkEd25519Provider;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.ByteString;
 import foundation.identity.jsonld.JsonLDObject;
-import inf.um.protos.PabcSerializer;
 import inf.um.psmultisign.PSauxArg;
-import inf.um.psmultisign.PSprivateKey;
 import inf.um.psmultisign.PSverfKey;
 import inf.um.util.Pair;
 import info.weboftrust.ldsignatures.jsonld.LDSecurityContexts;
 import info.weboftrust.ldsignatures.signer.PsmsBlsSignature2022LdSigner;
-
-import info.weboftrust.ldsignatures.signer.PsmsBlsSignatureProof2022LdSigner;
+import info.weboftrust.ldsignatures.signer.PsmsBlsSignatureProof2022LdProver;
 import info.weboftrust.ldsignatures.verifier.PsmsBlsSignature2022LdVerifier;
 import info.weboftrust.ldsignatures.verifier.PsmsBlsSignatureProof2022LdVerifier;
+import jakarta.json.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.Base64;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import inf.um.psmultisign.PSms;
 import inf.um.multisign.*;
-import inf.um.pairingInterfaces.ZpElement;
-import inf.um.pairingInterfaces.Group1Element;
-import com.fasterxml.jackson.core.type.TypeReference;
+
 
 
 public class JsonLdSignPsmsBlsSignatureTest {
 
-    String zkp_fields_json = "{"
-            + "\"@context\":[\"https://www.w3.org/2018/credentials/v1\",\"https://w3id.org/citizenship/v1\",\"https://ssiproject.inf.um.es/security/psms/v1\"], "
-            + "\"credentialSubject\":{\"@explicit\":true, \"https://w3id.org/citizenship#birthCountry\":{},\"https://www.w3.org/2018/credentials#credentialSubject\":{},\"http://schema.org/familyName\":{}},"
-            + "\"expirationDate\":{},"
-            + "\"issuer\":{}, "
-            + "\"type\":[\"VerifiableCredential\",\"PermanentResidentCard\"]"
-            + "}";
+    Set<String> attrNames_1 =new HashSet<>(Arrays.asList(
+            "http://schema.org/birthDate",
+            "http://schema.org/familyName",
+            "http://schema.org/gender",
+            "http://schema.org/givenName",
+            "http://schema.org/image",
+            "https://w3id.org/citizenship#birthCountry",
+            "https://w3id.org/citizenship#commuterClassification",
+            "https://w3id.org/citizenship#lprCategory",
+            "https://w3id.org/citizenship#lprNumber",
+            "https://w3id.org/citizenship#residentSince"
+    ));
 
-    @BeforeEach
-    public void before() {
+    Set<String> attrNames_2 =new HashSet<>(Arrays.asList(
+            "https://www.w3.org/ns/credentials/examples#alumniOf"
+    ));
 
-        RandomProvider.set(new JavaRandomProvider());
-        SHA256Provider.set(new JavaSHA256Provider());
-        Ed25519Provider.set(new TinkEd25519Provider());
-    }
+    String[] vc = {"vc_umu1.jsonld","vc_umu2.jsonld"};
+    String[] frames = {"frame_umu1.jsonld","frame_umu2.jsonld"};
 
     @Test
     @SuppressWarnings("unchecked")
     public void testSign() throws Throwable {
+        Set<String>[] attributes = new HashSet[2];
+        attributes[0] = new HashSet<>();
+        attributes[1] = new HashSet<>();
+        attributes[0].addAll(attrNames_1);
+        attributes[1].addAll(attrNames_2);
 
-        // Leo el documento JSON
-        JsonLDObject credential = JsonLDObject.fromJson(new InputStreamReader(Objects.requireNonNull(JsonLdSignPsmsBlsSignatureTest.class.getResourceAsStream("vc_umu.jsonld"))));
-        credential.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
+        for (int i = 0; i < vc.length; i++) {
+            String credential_name = vc[i];
+            String frame_name = frames[i];
+            Set<String> attrNames_credential_subject = attributes[i];
 
-        MS psScheme=new PSms();
-
-        Set<String> attrNames=new HashSet<>(Arrays.asList(
-                "http://schema.org/birthDate",
-                "http://schema.org/familyName",
-                "http://schema.org/gender",
-                "http://schema.org/givenName",
-                "http://schema.org/image",
-                "https://w3id.org/citizenship#birthCountry",
-                "https://w3id.org/citizenship#commuterClassification",
-                "https://w3id.org/citizenship#lprCategory",
-                "https://w3id.org/citizenship#lprNumber",
-                "https://w3id.org/citizenship#residentSince",
-                "http://schema.org/description",
-                "http://schema.org/name",
-                "https://www.w3.org/2018/credentials#issuanceDate",
-                "https://www.w3.org/2018/credentials#credentialSubject",
-                "https://www.w3.org/2018/credentials#expirationDate",
-                "https://www.w3.org/2018/credentials#issuer"));
-
-        Set<String> attrNames_credential_subject =new HashSet<>(Arrays.asList(
-                "http://schema.org/birthDate",
-                "http://schema.org/familyName",
-                "http://schema.org/gender",
-                "http://schema.org/givenName",
-                "http://schema.org/image",
-                "https://w3id.org/citizenship#birthCountry",
-                "https://w3id.org/citizenship#commuterClassification",
-                "https://w3id.org/citizenship#lprCategory",
-                "https://w3id.org/citizenship#lprNumber",
-                "https://w3id.org/citizenship#residentSince"
-        ));
-
-
-        String PAIRING_NAME="inf.um.pairingBLS461.PairingBuilderBLS461";
-
-        MSauxArg auxArg=new PSauxArg(PAIRING_NAME,attrNames);
-        psScheme.setup(1,auxArg, "seed".getBytes());
-
-
-        Pair<MSprivateKey,MSverfKey> keys=psScheme.kg();
-
-        PSverfKey publick = (PSverfKey) keys.getSecond();
-        System.out.println("Public:"+Base64.getEncoder().encodeToString(publick.getEncoded()));
-
-        PSprivateKey privatek = (PSprivateKey) keys.getFirst();
-        System.out.println("Private");
-        System.out.println("getx: "+Base64.getEncoder().encodeToString(privatek.getX().toBytes()));
-        System.out.println("y_epoch: "+Base64.getEncoder().encodeToString(privatek.getY_epoch().toBytes()));
-        System.out.println("y_m: "+Base64.getEncoder().encodeToString(privatek.getY_m().toBytes()));
-
-        Map <String,ZpElement> y = privatek.getY();
-        for (Map.Entry<String, ZpElement> entry : y.entrySet()) {
-            System.out.println(entry.getKey()+" : "+Base64.getEncoder().encodeToString(entry.getValue().toBytes()));
         }
 
+
+
+
+
+
+
+
+
+        // Leo el documento JSON
+        JsonLDObject credential = JsonLDObject.fromJson(new InputStreamReader(Objects.requireNonNull(JsonLdSignPsmsBlsSignatureTest.class.getResourceAsStream("vc_umu1.jsonld"))));
+        String frameString = JsonLDObject.fromJson(new InputStreamReader(Objects.requireNonNull(JsonLdSignPsmsBlsSignatureTest.class.getResourceAsStream("frame_umu1.jsonld")))).toString();
+        credential.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
+
+        // SETUP
+        MS psScheme=new PSms();
+        String PAIRING_NAME="inf.um.pairingBLS461.PairingBuilderBLS461";
+        MSauxArg auxArg=new PSauxArg(PAIRING_NAME,attrNames_1);
+        psScheme.setup(1,auxArg, "seed".getBytes());
+
+        // K+ y K-
+        Pair<MSprivateKey,MSverfKey> keys=psScheme.kg();
+
+        // CREDENTIAL ISSUER AND VERIFIER
         PsmsBlsSignature2022LdSigner signer = new PsmsBlsSignature2022LdSigner(keys.getFirst());
-        PsmsBlsSignature2022LdVerifier verifier = new PsmsBlsSignature2022LdVerifier(keys.getSecond());
-
-
         LdProof ldProof = signer.sign(credential);
+
+        System.out.println("CREDENTIAL");
+        System.out.println(credential);
+
+        PsmsBlsSignature2022LdVerifier verifier = new PsmsBlsSignature2022LdVerifier(keys.getSecond());
         boolean verify = verifier.verify(credential,ldProof);
         assertTrue(verify);
 
-        // CREDENTIAL /
-
-        JsonLDObject presentation = JsonLDObject.fromJson(new InputStreamReader(Objects.requireNonNull(JsonLdSignPsmsBlsSignatureTest.class.getResourceAsStream("vc_presentation_zkp.jsonld"))));
+        JsonLdOptions options = new JsonLdOptions();
+        options.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
+        Document vcDocument = JsonDocument.of(new ByteArrayInputStream(credential.toString().getBytes(StandardCharsets.UTF_8)));
+        Document frameDocument = JsonDocument.of(new ByteArrayInputStream(frameString.getBytes(StandardCharsets.UTF_8)));
+        JsonObject framedVcJson = JsonLd.frame(vcDocument, frameDocument).options(options).get();
+        JsonLDObject presentation = JsonLDObject.fromJson(framedVcJson.toString());
         presentation.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
+
         String nonce = "123456789";
 
+        System.out.println("FRAME");
+        System.out.println(frameString);
 
-        PsmsBlsSignatureProof2022LdSigner signerProof = new PsmsBlsSignatureProof2022LdSigner((PSverfKey) keys.getSecond(),nonce,zkp_fields_json, credential);
-        PsmsBlsSignatureProof2022LdVerifier verifierProof = new PsmsBlsSignatureProof2022LdVerifier(keys.getSecond(), nonce, zkp_fields_json);
+        PsmsBlsSignatureProof2022LdProver signerProof = new PsmsBlsSignatureProof2022LdProver((PSverfKey) keys.getSecond(),nonce, credential);
+        LdProof zkproof = signerProof.sign(credential,presentation);
 
-        LdProof zkproof = signerProof.sign(presentation);
+        System.out.println("PRESENTATION");
+        System.out.println(presentation);
+
+        PsmsBlsSignatureProof2022LdVerifier verifierProof = new PsmsBlsSignatureProof2022LdVerifier(keys.getSecond(),
+                );
         boolean verifyProof = verifierProof.verify(presentation,zkproof);
+
         assertTrue(verifyProof);
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
+
+
 }

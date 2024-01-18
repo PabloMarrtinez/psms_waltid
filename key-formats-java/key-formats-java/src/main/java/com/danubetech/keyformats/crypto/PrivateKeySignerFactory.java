@@ -66,10 +66,6 @@ public class PrivateKeySignerFactory {
 
             if (JWSAlgorithm.PSMSAlg.equals(algorithm))
                 return new PsmsBlsSignature2022_PrivateKeySigner((MSprivateKey) privateKey);
-        }else if (KeyTypeName.PsmsBlsSignature2022Proof.equals(keyTypeName)) {
-
-            if (JWSAlgorithm.PSMSAlgProof.equals(algorithm))
-                return new PsmsBlsSignatureProof2022_PrivateKeySigner((MSverfKey) privateKey, null,null,null);
         }
 
 

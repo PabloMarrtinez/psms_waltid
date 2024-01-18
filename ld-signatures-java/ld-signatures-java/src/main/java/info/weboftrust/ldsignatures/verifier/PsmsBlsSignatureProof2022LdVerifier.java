@@ -19,25 +19,18 @@ import java.util.Map;
 
 public class PsmsBlsSignatureProof2022LdVerifier extends LdVerifier<PsmsBlsSignatureProof2022SignatureSuite>{
 
-    private static String zkpFields;
-    public PsmsBlsSignatureProof2022LdVerifier(ByteVerifier verifier,String zkpfields) {
+    public PsmsBlsSignatureProof2022LdVerifier(ByteVerifier verifier) {
 
         super(SignatureSuites.SIGNATURE_SUITE_PSMSBLSSIGNATUREPROOF2022, verifier, new URDNA2015UmuCanonicalizer());
-        zkpFields = zkpfields;
+
     }
 
-    public PsmsBlsSignatureProof2022LdVerifier(MSverfKey publicKey, String nonce, String zkpFields) {
+    public PsmsBlsSignatureProof2022LdVerifier(MSverfKey publicKey, String nonce) {
 
-        this(new PsmsBlsSignatureProof2022_PublicKeyVerifier(publicKey,nonce, zkpFields),zkpFields);
+        this(new PsmsBlsSignatureProof2022_PublicKeyVerifier(publicKey,nonce));
     }
 
-    public static String getZkpFields() {
-        return zkpFields;
-    }
 
-    public static void setZkpFields(String zkpFields) {
-        PsmsBlsSignatureProof2022LdVerifier.zkpFields = zkpFields;
-    }
 
     public PsmsBlsSignatureProof2022LdVerifier(String zkpfields) {
 

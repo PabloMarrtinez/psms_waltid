@@ -14,6 +14,7 @@ import inf.um.pairingInterfaces.PairingBuilder;
 import inf.um.pairingInterfaces.ZpElement;
 import inf.um.protos.PabcSerializer;
 import inf.um.psmultisign.PSsignature;
+import inf.um.util.Pair;
 import org.miracl.core.BLS12461.CONFIG_BIG;
 
 import java.io.IOException;
@@ -33,44 +34,62 @@ public class PsmsUmuUtils {
 
 
 
-    public static Map<String, String> getDigest(String input) {
-        System.out.println(input);
-        Map<String, String> attributeValues = new HashMap<>();
-        String[] lines = input.split("\n");
-        Pattern pattern = Pattern.compile("<[^>]+>\\s+<([^>]+)>\\s+(\\\"[^\\\"]+\\\"|<([^>]+)>)(?:\\^\\^<([^>]+)>)?\\s*\\.");
-        for (String line : lines) {
-            Matcher matcher = pattern.matcher(line);
-            if (matcher.find()) {
-                String attribute = matcher.group(1);
-                String value = matcher.group(2);
-                attributeValues.put(attribute, value);
+    public static  Map<String, String> getDigest(String doc) {
+        Pattern subjectRegex = Pattern.compile("<https://www.w3.org/2018/credentials#credentialSubject>\\s+<?([^<>\\t\\n\\f\\r ]+)>?\\s+\\.");
+        Matcher matcher = subjectRegex.matcher(doc);
+
+        List<String> ids = new ArrayList<>();
+        while (matcher.find()) {
+            String id = matcher.group(1);
+            if (!id.isEmpty()) {
+                ids.add(id);
             }
-
         }
-        return attributeValues;
-    }
-
-/*
-    public static Map<String, String> getDigest(String input) {
-        System.out.println(input);
         Map<String, String> attributeValues = new HashMap<>();
-        String[] lines = input.split("\n");
-        Pattern pattern = Pattern.compile("(<did:example:[^>]+>)\\s+<([^>]+)>\\s+(\\\"[^\\\"]+\\\"|<([^>]+)>)(?:\\^\\^<([^>]+)>)?\\s*\\.");
-        for (String line : lines) {
-            Matcher matcher = pattern.matcher(line);
-            if (matcher.find()) {
-                String subject = matcher.group(1);
-                String attribute = matcher.group(2);
-                String value = matcher.group(3);
-                System.out.println(attribute+" : "+value);
-                if (subject.startsWith("<did:example:")) {
-                    attributeValues.put(attribute, value);
+        for (String id : ids) {
+            Pattern attrRegex = Pattern.compile("<?" + Pattern.quote(id) + ">?\\s+<([^>]+)>\\s+(.+)\\s+\\.\n");
+            Matcher attrMatcher = attrRegex.matcher(doc);
+            while (attrMatcher.find()) {
+                String attrName = attrMatcher.group(1);
+                String attrValue = attrMatcher.group(2);
+                if (isIdentifier(attrValue)) {
+                    String recursedValues = parseJsonAttribute(doc, attrValue);
+                    attributeValues.put(attrName, attrValue + " " + recursedValues);
+                } else {
+                    attributeValues.put(attrName, attrValue);
                 }
             }
         }
+
         return attributeValues;
     }
-*/
+
+    public static boolean isIdentifier(String att) {
+        Pattern pattern = Pattern.compile("(^_:\\S+$)|<(urn:bnid:_:\\S+?>$)"); // \\S == [^\t\n\f\r ]
+        Matcher matcher = pattern.matcher(att);
+        return matcher.matches();
+    }
+
+
+    public static String parseJsonAttribute(String doc, String identifier) {
+        StringBuilder result = new StringBuilder();
+        Pattern attrRegex = Pattern.compile("<?" + Pattern.quote(identifier) + ">?\\s+<([^>]+)>\\s+(.+)\\s+\\.\n");
+        // REGEX 2 : <did:example:[^>]+>\\s+<([^>]+)>\\s+(\\\"[^\\\"]+\\\"|<([^>]+)>)(?:\\^\\^<([^>]+)>)?\\s*\\.
+        Matcher matcher = attrRegex.matcher(doc);
+
+        while (matcher.find()) {
+            String attr1 = matcher.group(1);
+            String attr2 = matcher.group(2);
+            if (isIdentifier(attr1)) {
+                String recursedValues = parseJsonAttribute(doc, attr1);
+                result.append(recursedValues).append(".");
+            } else {
+                result.append(attr1).append(" ").append(attr2).append(".");
+            }
+        }
+        return result.toString();
+    }
+
 
     public static Map<String, ZpElement> zkp_Attributes(Map<String, String> input) {
         Map<String, ZpElement> attributeValues = new HashMap<>();
@@ -80,44 +99,11 @@ public class PsmsUmuUtils {
             Attribute attr_value = new Attribute(attrValue);
             AttributeDefinition attr_def = new AttributeDefinitionString(attrDef,attrDef,1,10000);
             ZpElement zpElement = builder.getZpElementFromAttribute(attr_value, attr_def);
-            System.out.println(attrDef);
             attributeValues.put(attrDef, zpElement);
         }
         return attributeValues;
     }
 
-
-
-    public static Set<String> getAttrNames(String input) {
-        Set<String> attrNames = new HashSet<>();
-        String[] lines = input.split("\n");
-        Pattern pattern = Pattern.compile("<[^>]+>\\s+<([^>]+)>\\s+(\\\"[^\\\"]+\\\"|<([^>]+)>)(?:\\^\\^<([^>]+)>)?\\s*\\.");
-        for (String line : lines) {
-            Matcher matcher = pattern.matcher(line);
-            if (matcher.find()) {
-                String attribute = matcher.group(1);
-                attrNames.add(attribute);
-            }
-        }
-        return attrNames;
-    }
-
-
-/*
-    public static Set<String> getAttrNames(String input) {
-        Set<String> attrNames = new HashSet<>();
-        String[] lines = input.split("\n");
-        Pattern pattern = Pattern.compile("(<did:example:[^>]+>)\\s+<([^>]+)>\\s+(\\\"[^\\\"]+\\\"|<([^>]+)>)(?:\\^\\^<([^>]+)>)?\\s*\\.");
-        for (String line : lines) {
-            Matcher matcher = pattern.matcher(line);
-            if (matcher.find()) {
-                String attribute = matcher.group(1);
-                attrNames.add(attribute);
-            }
-        }
-        return attrNames;
-    }
-*/
 
     public static PSsignature getSignature(JsonLDObject credential) {
         String json = credential.toString(); // Reemplaza esto con tu método para obtener el JSON como String
@@ -146,28 +132,7 @@ public class PsmsUmuUtils {
         }
     }
 
-    public static Set<String> extractFields(String json) {
-        Set<String> fields = new HashSet<>();
-        ObjectMapper mapper = new ObjectMapper();
 
-        try {
-            JsonNode rootNode = mapper.readTree(json);
-            JsonNode credentialSubjectNode = rootNode.path("credentialSubject");
 
-            if (credentialSubjectNode.isObject()) {
-                Iterator<Map.Entry<String, JsonNode>> fieldsIterator = credentialSubjectNode.fields();
-                while (fieldsIterator.hasNext()) {
-                    Map.Entry<String, JsonNode> field = fieldsIterator.next();
-                    if (!field.getKey().equals("@explicit")) { // Ignorando la clave @explicit
-                        fields.add(field.getKey());
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return fields;
-    }
 
 }
