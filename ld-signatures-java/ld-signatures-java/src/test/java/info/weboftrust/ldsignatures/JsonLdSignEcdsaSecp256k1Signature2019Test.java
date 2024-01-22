@@ -36,7 +36,6 @@ public class JsonLdSignEcdsaSecp256k1Signature2019Test {
 		signer.setDomain(domain);
 		signer.setNonce(nonce);
 		LdProof ldProof = signer.sign(jsonLdObject);
-
 		assertEquals(SignatureSuites.SIGNATURE_SUITE_ECDSASECP256L1SIGNATURE2019.getTerm(), ldProof.getType());
 		assertEquals(creator, ldProof.getCreator());
 		assertEquals(created, ldProof.getCreated());

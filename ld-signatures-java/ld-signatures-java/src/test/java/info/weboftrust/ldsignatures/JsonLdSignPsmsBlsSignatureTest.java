@@ -11,6 +11,7 @@ import com.danubetech.keyformats.crypto.provider.impl.JavaRandomProvider;
 import com.danubetech.keyformats.crypto.provider.impl.JavaSHA256Provider;
 import com.danubetech.keyformats.crypto.provider.impl.TinkEd25519Provider;
 import foundation.identity.jsonld.JsonLDObject;
+import foundation.identity.jsonld.JsonLDUtils;
 import inf.um.psmultisign.PSauxArg;
 import inf.um.psmultisign.PSverfKey;
 import inf.um.util.Pair;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -68,7 +70,55 @@ public class JsonLdSignPsmsBlsSignatureTest {
             String credential_name = vc[i];
             String frame_name = frames[i];
             Set<String> attrNames_credential_subject = attributes[i];
+            // Leo el documento JSON
+            JsonLDObject credential = JsonLDObject.fromJson(new InputStreamReader(Objects.requireNonNull(JsonLdSignPsmsBlsSignatureTest.class.getResourceAsStream(credential_name))));
+            String frameString = JsonLDObject.fromJson(new InputStreamReader(Objects.requireNonNull(JsonLdSignPsmsBlsSignatureTest.class.getResourceAsStream(frame_name)))).toString();
+            credential.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
 
+            // SETUP
+            MS psScheme=new PSms();
+            String PAIRING_NAME="inf.um.pairingBLS461.PairingBuilderBLS461";
+            MSauxArg auxArg=new PSauxArg(PAIRING_NAME,attrNames_credential_subject);
+            psScheme.setup(1,auxArg, "seed".getBytes());
+
+            // K+ y K-
+            Pair<MSprivateKey,MSverfKey> keys=psScheme.kg();
+
+            // CREDENTIAL ISSUER AND VERIFIER
+            PsmsBlsSignature2022LdSigner signer = new PsmsBlsSignature2022LdSigner(keys.getFirst());
+            LdProof ldProof = signer.sign(credential);
+
+            System.out.println("CREDENTIAL");
+            System.out.println(credential);
+            System.out.println(ldProof);
+            PsmsBlsSignature2022LdVerifier verifier = new PsmsBlsSignature2022LdVerifier(keys.getSecond());
+            boolean verify = verifier.verify(credential,ldProof);
+            assertTrue(verify);
+
+            JsonLdOptions options = new JsonLdOptions();
+            options.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
+            Document vcDocument = JsonDocument.of(new ByteArrayInputStream(credential.toString().getBytes(StandardCharsets.UTF_8)));
+            Document frameDocument = JsonDocument.of(new ByteArrayInputStream(frameString.getBytes(StandardCharsets.UTF_8)));
+            JsonObject framedVcJson = JsonLd.frame(vcDocument, frameDocument).options(options).get();
+            JsonLDObject presentation = JsonLDObject.fromJson(framedVcJson.toString());
+            presentation.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
+
+            String nonce = "123456789";
+
+            System.out.println("FRAME");
+            System.out.println(frameString);
+
+            PsmsBlsSignatureProof2022LdProver signerProof = new PsmsBlsSignatureProof2022LdProver((PSverfKey) keys.getSecond(),nonce, credential);
+            LdProof zkproof = signerProof.sign(credential,presentation);
+
+            System.out.println("PRESENTATION");
+            System.out.println(presentation);
+
+            PsmsBlsSignatureProof2022LdVerifier verifierProof = new PsmsBlsSignatureProof2022LdVerifier(keys.getSecond(),nonce);
+            boolean verifyProof = verifierProof.verify(presentation,zkproof);
+
+            assertTrue(verifyProof);
+        }
         }
 
 
@@ -79,56 +129,7 @@ public class JsonLdSignPsmsBlsSignatureTest {
 
 
 
-        // Leo el documento JSON
-        JsonLDObject credential = JsonLDObject.fromJson(new InputStreamReader(Objects.requireNonNull(JsonLdSignPsmsBlsSignatureTest.class.getResourceAsStream("vc_umu1.jsonld"))));
-        String frameString = JsonLDObject.fromJson(new InputStreamReader(Objects.requireNonNull(JsonLdSignPsmsBlsSignatureTest.class.getResourceAsStream("frame_umu1.jsonld")))).toString();
-        credential.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
 
-        // SETUP
-        MS psScheme=new PSms();
-        String PAIRING_NAME="inf.um.pairingBLS461.PairingBuilderBLS461";
-        MSauxArg auxArg=new PSauxArg(PAIRING_NAME,attrNames_1);
-        psScheme.setup(1,auxArg, "seed".getBytes());
-
-        // K+ y K-
-        Pair<MSprivateKey,MSverfKey> keys=psScheme.kg();
-
-        // CREDENTIAL ISSUER AND VERIFIER
-        PsmsBlsSignature2022LdSigner signer = new PsmsBlsSignature2022LdSigner(keys.getFirst());
-        LdProof ldProof = signer.sign(credential);
-
-        System.out.println("CREDENTIAL");
-        System.out.println(credential);
-
-        PsmsBlsSignature2022LdVerifier verifier = new PsmsBlsSignature2022LdVerifier(keys.getSecond());
-        boolean verify = verifier.verify(credential,ldProof);
-        assertTrue(verify);
-
-        JsonLdOptions options = new JsonLdOptions();
-        options.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
-        Document vcDocument = JsonDocument.of(new ByteArrayInputStream(credential.toString().getBytes(StandardCharsets.UTF_8)));
-        Document frameDocument = JsonDocument.of(new ByteArrayInputStream(frameString.getBytes(StandardCharsets.UTF_8)));
-        JsonObject framedVcJson = JsonLd.frame(vcDocument, frameDocument).options(options).get();
-        JsonLDObject presentation = JsonLDObject.fromJson(framedVcJson.toString());
-        presentation.setDocumentLoader(LDSecurityContexts.DOCUMENT_LOADER);
-
-        String nonce = "123456789";
-
-        System.out.println("FRAME");
-        System.out.println(frameString);
-
-        PsmsBlsSignatureProof2022LdProver signerProof = new PsmsBlsSignatureProof2022LdProver((PSverfKey) keys.getSecond(),nonce, credential);
-        LdProof zkproof = signerProof.sign(credential,presentation);
-
-        System.out.println("PRESENTATION");
-        System.out.println(presentation);
-
-        PsmsBlsSignatureProof2022LdVerifier verifierProof = new PsmsBlsSignatureProof2022LdVerifier(keys.getSecond(),
-                );
-        boolean verifyProof = verifierProof.verify(presentation,zkproof);
-
-        assertTrue(verifyProof);
-    }
 
 
 }

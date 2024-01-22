@@ -109,10 +109,17 @@ public abstract class LdSigner<SIGNATURESUITE extends SignatureSuite> {
     }
 
     private void loadMissingContext(JsonLDObject jsonLDObject){
+        //System.out.println("1: "+jsonLDObject.getContexts());
+        //System.out.println("2 :"+this.getSignatureSuite().getSupportedJsonLDContexts());
+        //System.out.println("bool :"+this.getSignatureSuite().getSupportedJsonLDContexts().stream().noneMatch(jsonLDObject.getContexts()::contains));
         if(this.getSignatureSuite().getSupportedJsonLDContexts().stream().noneMatch(jsonLDObject.getContexts()::contains)){
             URI missingJsonLDContext = this.signatureSuite.getDefaultSupportedJsonLDContext();
+
             if (missingJsonLDContext != null) {
-                JsonLDUtils.jsonLdAddAsJsonArray(jsonLDObject, Keywords.CONTEXT, missingJsonLDContext);
+                String missingJsonLDContextString = missingJsonLDContext.toString();
+                JsonLDUtils.jsonLdAddAsJsonArray(jsonLDObject, Keywords.CONTEXT, missingJsonLDContextString);
+
+                //JsonLDUtils.jsonLdAddAsJsonArray(jsonLDObject, Keywords.CONTEXT, missingJsonLDContext);
             }
         }
     }
